@@ -18,7 +18,7 @@ if (!function_exists('dist_mi_catalogo_opcion_valor')) {
 if (!function_exists('dist_mi_catalogo_categoria_texto')) {
   function dist_mi_catalogo_categoria_texto($categoria) {
     if (!is_array($categoria)) { return ''; }
-    $texto = isset($categoria['ruta']) && $categoria['ruta'] ? $categoria['ruta'] : (isset($categoria['nombre']) ? $categoria['nombre'] : 'Categoria');
+    $texto = isset($categoria['ruta']) && $categoria['ruta'] ? $categoria['ruta'] : (isset($categoria['nombre']) ? $categoria['nombre'] : 'Categoría');
     if (isset($categoria['total'])) { $texto .= ' (' . intval($categoria['total']) . ')'; }
     return $texto;
   }
@@ -34,7 +34,7 @@ $categoriaActual = isset($_GET['categoria']) ? trim((string) $_GET['categoria'])
 $marcaActual = isset($_GET['marca']) ? trim((string) $_GET['marca']) : '';
 $categoriasApi = isset($datos['categorias']['items']) && is_array($datos['categorias']['items']) ? $datos['categorias']['items'] : array();
 $marcasApi = isset($datos['marcas']['items']) && is_array($datos['marcas']['items']) ? $datos['marcas']['items'] : array();
-$categoriaTextoActual = 'Todas las categorias';
+$categoriaTextoActual = 'Todas las categorías';
 foreach ($categoriasApi as $categoriaOpcion) {
   if ((string) dist_mi_catalogo_opcion_valor($categoriaOpcion, array('id', 'id_categoria', 'id_categoria_erp')) === (string) $categoriaActual) { $categoriaTextoActual = dist_mi_catalogo_categoria_texto($categoriaOpcion); break; }
 }
@@ -46,7 +46,7 @@ $puedePedidoPreliminar = !empty($acciones['pedido_preliminar']) || SesionCliente
   <div>
     <span class="badge badge-primary">Productos frecuentes</span>
     <h2>Mi catálogo</h2>
-    <p>Productos guardados por tu cuenta para tenerlos a la mano. No genera pedido, no aparta inventario y no modifica existencias del ERP.</p>
+    <p>Productos guardados por tu cuenta para tenerlos a la mano. No confirma venta, no reserva inventario y no modifica existencias.</p>
   </div>
   <div class="mi-catalogo-summary">
     <strong data-mi-catalogo-count><?php echo count($items); ?></strong>
@@ -57,31 +57,31 @@ $puedePedidoPreliminar = !empty($acciones['pedido_preliminar']) || SesionCliente
 <div class="catalog-feedback is-hidden" data-mi-catalogo-feedback></div>
 
 <?php if (!$configurado): ?>
-  <div class="alert alert-warning">Esta funcion estara disponible proximamente.</div>
+  <div class="alert alert-warning">Esta función estará disponible próximamente.</div>
 <?php elseif (!empty($respuesta['error'])): ?>
-  <div class="alert alert-warning"><?php echo htmlspecialchars(isset($respuesta['mensaje']) ? $respuesta['mensaje'] : 'No se pudo consultar Mi catalogo.'); ?></div>
+  <div class="alert alert-warning"><?php echo htmlspecialchars(isset($respuesta['mensaje']) ? $respuesta['mensaje'] : 'No se pudo consultar Mi catálogo.'); ?></div>
 <?php else: ?>
   <section class="card catalog-table-card mi-catalogo-card">
     <div class="card-header">
       <div><h2>Productos guardados</h2><p>Busca, revisa detalle o quita productos de tu lista personal.</p></div>
-      <a class="btn btn-light" href="<?php echo URL_RAIZ; ?>/catalogo"><span class="icon icon-boxes"></span>Catalogo general</a>
+      <a class="btn btn-light" href="<?php echo URL_RAIZ; ?>/catalogo"><span class="icon icon-boxes"></span>Catálogo autorizado</a>
     </div>
 
     <form class="mi-catalogo-toolbar" method="get">
       <label class="field-block">Buscar en Mi catálogo
         <div class="search-control"><span class="icon icon-search"></span><input type="search" name="q" value="<?php echo htmlspecialchars($q); ?>" placeholder="SKU, producto, marca o categoria"></div>
       </label>
-      <label class="field-block filter-category">Categoria
+      <label class="field-block filter-category">Categoría
         <div class="category-combobox" data-category-combobox>
           <input type="hidden" name="categoria" value="<?php echo htmlspecialchars($categoriaActual); ?>" data-category-value>
           <button class="category-combobox-button" type="button" data-category-toggle><span data-category-label><?php echo htmlspecialchars($categoriaTextoActual); ?></span><span class="icon icon-filter"></span></button>
           <div class="category-combobox-menu is-hidden" data-category-menu>
-            <input type="search" data-category-search placeholder="Buscar categoria" autocomplete="off">
+            <input type="search" data-category-search placeholder="Buscar categoría" autocomplete="off">
             <div class="category-option-list">
-              <button type="button" data-category-option value="">Todas las categorias</button>
+              <button type="button" data-category-option value="">Todas las categorías</button>
               <?php foreach ($categoriasApi as $categoriaOpcion): ?>
-                <?php $valorCategoria = dist_mi_catalogo_opcion_valor($categoriaOpcion, array('id', 'id_categoria', 'id_categoria_erp')); if ($valorCategoria === '') { continue; } $textoCategoria = dist_mi_catalogo_categoria_texto($categoriaOpcion); ?>
-                <button type="button" data-category-option value="<?php echo htmlspecialchars($valorCategoria); ?>"><?php echo htmlspecialchars($textoCategoria); ?></button>
+                <?php $valorCategoría = dist_mi_catalogo_opcion_valor($categoriaOpcion, array('id', 'id_categoria', 'id_categoria_erp')); if ($valorCategoría === '') { continue; } $textoCategoría = dist_mi_catalogo_categoria_texto($categoriaOpcion); ?>
+                <button type="button" data-category-option value="<?php echo htmlspecialchars($valorCategoría); ?>"><?php echo htmlspecialchars($textoCategoría); ?></button>
               <?php endforeach; ?>
             </div>
           </div>
@@ -111,7 +111,7 @@ $puedePedidoPreliminar = !empty($acciones['pedido_preliminar']) || SesionCliente
 
     <div class="table-responsive">
       <table class="data-table mi-catalogo-table">
-        <thead><tr><th>Producto</th><th>Categoria</th><th>Marca</th><th>Presentacion</th><th>Cantidad</th><th>Comentario</th><th class="text-end">Acciones</th></tr></thead>
+        <thead><tr><th>Producto</th><th>Categoría</th><th>Marca</th><th>Presentacion</th><th>Cantidad</th><th>Comentario</th><th class="text-end">Acciones</th></tr></thead>
         <tbody data-mi-catalogo-list>
           <?php if (empty($items)): ?><tr><td colspan="7" class="empty-row">Aun no tienes productos guardados en Mi catálogo.</td></tr><?php endif; ?>
           <?php foreach ($items as $item): ?>
@@ -121,7 +121,7 @@ $puedePedidoPreliminar = !empty($acciones['pedido_preliminar']) || SesionCliente
               $sku = dist_mi_catalogo_valor($item, 'sku', 'SKU');
               $slug = dist_mi_catalogo_valor($item, 'slug');
               $imagen = dist_mi_catalogo_valor($item, 'imagen_principal');
-              $categoria = dist_mi_catalogo_valor($item, 'categoria', 'Sin categoria');
+              $categoria = dist_mi_catalogo_valor($item, 'categoria', 'Sin categoría');
               $marca = dist_mi_catalogo_valor($item, 'marca', 'Sin marca');
               $presentacion = dist_mi_catalogo_valor($item, 'presentacion', 'Unidad');
             ?>
@@ -162,7 +162,7 @@ $puedePedidoPreliminar = !empty($acciones['pedido_preliminar']) || SesionCliente
           <span class="badge badge-primary" data-mi-modal-sku></span>
           <h2 id="mi_catalogo_modal_titulo" data-mi-modal-title>Producto</h2>
           <div class="info-strip">
-            <div><small>Categoria</small><strong data-mi-modal-category></strong></div>
+            <div><small>Categoría</small><strong data-mi-modal-category></strong></div>
             <div><small>Marca</small><strong data-mi-modal-brand></strong></div>
             <div><small>Presentacion</small><strong data-mi-modal-presentation></strong></div>
           </div>

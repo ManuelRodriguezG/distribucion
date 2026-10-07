@@ -8,10 +8,10 @@ $rutaActual = isset($_GET['url']) ? trim($_GET['url'], '/') : '';
 $rutaSegmento = $rutaActual !== '' ? explode('/', $rutaActual)[0] : '';
 $navItems = array(
   array('titulo' => 'Resumen', 'ruta' => '', 'icono' => 'speedometer', 'autenticado' => true),
-  array('titulo' => 'Catalogo', 'ruta' => 'catalogo', 'icono' => 'boxes', 'accion' => 'ver_catalogo', 'permiso' => 'distribucion.catalogo.ver'),
+  array('titulo' => 'Catálogo', 'ruta' => 'catalogo', 'icono' => 'boxes', 'accion' => 'ver_catalogo', 'permiso' => 'distribucion.catalogo.ver'),
   array('titulo' => 'Mi catálogo', 'ruta' => 'mi-catalogo', 'icono' => 'star', 'accion' => 'gestionar_mi_catalogo', 'permiso' => 'distribucion.mi_catalogo.gestionar'),
   array('titulo' => 'Cotizaciones', 'ruta' => 'cotizaciones', 'icono' => 'quote', 'accion' => 'agregar_cotizacion', 'permiso' => 'distribucion.cotizacion.solicitar'),
-  array('titulo' => 'Nueva cotizacion', 'ruta' => 'cotizacion', 'icono' => 'plus', 'accion' => 'agregar_cotizacion', 'permiso' => 'distribucion.cotizacion.solicitar'),
+  array('titulo' => 'Nueva solicitud', 'ruta' => 'cotizacion', 'icono' => 'plus', 'accion' => 'agregar_cotizacion', 'permiso' => 'distribucion.cotizacion.solicitar'),
   array('titulo' => 'Pedidos', 'ruta' => 'pedidos', 'icono' => 'quote', 'accion' => 'agregar_cotizacion', 'permiso' => 'distribucion.pedido.preliminar'),
   array('titulo' => 'Cuenta', 'ruta' => 'cuenta', 'icono' => 'user', 'autenticado' => true)
 );
@@ -29,10 +29,10 @@ $navItems = array(
     <aside class="app-sidebar">
       <a class="app-brand" href="<?php echo URL_RAIZ; ?>">
         <span class="brand-mark">A</span>
-        <span><strong>Artiani</strong><small>Distribucion</small></span>
+        <span><strong>Artiani</strong><small>Distribución</small></span>
       </a>
 
-      <nav class="side-nav" aria-label="Navegacion principal">
+      <nav class="side-nav" aria-label="Navegación principal">
         <?php foreach ($navItems as $item): ?>
           <?php
             $visible = empty($item['autenticado']) || SesionCliente::autenticado();
@@ -53,17 +53,17 @@ $navItems = array(
         <small><?php echo htmlspecialchars($perfilEstatus); ?></small>
       </div>
       <?php if (SesionCliente::autenticado()): ?>
-        <a class="sidebar-logout" href="<?php echo URL_RAIZ; ?>/auth/salir"><span class="icon icon-logout" aria-hidden="true"></span><span>Cerrar sesion</span></a>
+        <a class="sidebar-logout" href="<?php echo URL_RAIZ; ?>/auth/salir"><span class="icon icon-logout" aria-hidden="true"></span><span>Cerrar sesión</span></a>
       <?php endif; ?>
     </aside>
 
     <div class="app-main">
       <header class="topbar">
-        <button class="icon-button mobile-menu" type="button" data-toggle-sidebar title="Menu">
+        <button class="icon-button mobile-menu" type="button" data-toggle-sidebar title="Menú">
           <span class="icon icon-menu" aria-hidden="true"></span>
         </button>
         <div>
-          <p class="topbar-kicker">Portal comercial B2B</p>
+          <p class="topbar-kicker">Portal comercial</p>
           <h1><?php echo htmlspecialchars($titulo); ?></h1>
         </div>
         <div class="topbar-actions">

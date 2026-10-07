@@ -10,3 +10,5 @@ define('ERP_API_TIMEOUT', 15);
 define('ERP_API_CANAL', 'distribucion');
 define('DISTRIBUCION_DOMINIO_LOCAL', 'distribucion.artiani.com.local');
 define('DISTRIBUCION_DOMINIO_PRODUCCION', 'distribucion.artiani.com.mx');
+
+define('DISTRIBUCION_TESTER_API_HABILITADO', false);

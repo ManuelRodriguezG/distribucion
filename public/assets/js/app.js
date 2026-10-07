@@ -1,4 +1,4 @@
-(function () {
+﻿(function () {
   var storageKey = "distribucion_cotizacion_items";
   var quoteDraftKey = "distribucion_cotizacion_borradores";
   var quoteEditKey = "distribucion_cotizacion_editando";
@@ -50,7 +50,7 @@
   }
 
   function money(value) {
-    if (value === null || value === undefined || value === "") { return "Pendiente de revision"; }
+    if (value === null || value === undefined || value === "") { return "Pendiente de revisión"; }
     return "$" + Number(value).toLocaleString("es-MX", {minimumFractionDigits: 2, maximumFractionDigits: 2});
   }
 
@@ -80,7 +80,7 @@
     if (!list) { return; }
     var state = readEditState();
     if (state.id_cotizacion_distribucion) { return; }
-    list.innerHTML = "<div class=\"empty-row\">Los borradores se guardan en el ERP y aparecen en Mis cotizaciones.</div>";
+    list.innerHTML = "<div class=\"empty-row\">Los borradores guardados aparecerán en Mis cotizaciones.</div>";
   }
   function draftPayload() {
     var cart = readCart();
@@ -89,7 +89,7 @@
     var comentarios = document.getElementById("cotizacion_comentarios");
     return {
       id_cotizacion_distribucion: edit.id_cotizacion_distribucion || null,
-      nombre: nameInput && nameInput.value.trim() !== "" ? nameInput.value.trim() : (edit.nombre || "Cotizacion " + new Date().toLocaleString("es-MX")),
+      nombre: nameInput && nameInput.value.trim() !== "" ? nameInput.value.trim() : (edit.nombre || "Cotización " + new Date().toLocaleString("es-MX")),
       comentarios: comentarios ? comentarios.value : "",
       items: cart.map(function (item) { return {id_sku: Number(item.id_sku), cantidad: Number(item.cantidad || 1), comentario: item.comentario || ""}; })
     };
@@ -98,9 +98,9 @@
   function saveCurrentDraft(options) {
     var cart = readCart();
     options = options || {};
-    if (!cart.length) { showAlert("Agrega productos antes de guardar la cotizacion."); return Promise.reject(new Error("empty_cart")); }
+    if (!cart.length) { showAlert("Agrega productos antes de guardar la cotización."); return Promise.reject(new Error("empty_cart")); }
     return postJson("/cotizaciones/guardar", draftPayload()).then(function (response) {
-      if (response.error) { showAlert(response.mensaje || "No se pudo guardar la cotizacion"); throw new Error("save_failed"); }
+      if (response.error) { showAlert(response.mensaje || "No se pudo guardar la cotización"); throw new Error("save_failed"); }
       writeEditState({
         id_cotizacion_distribucion: response.id_cotizacion_distribucion,
         folio: response.folio,
@@ -110,8 +110,8 @@
       var subtotal = document.getElementById("cotizacion_subtotal");
       var estado = document.getElementById("cotizacion_estado");
       if (subtotal) { subtotal.textContent = money(response.total_estimado); }
-      if (estado) { estado.textContent = response.estatus || "Borrador"; estado.className = "badge badge-warning"; }
-      if (!options.quiet) { showAlert("Cotizacion guardada en ERP: " + (response.folio || "borrador"), "ok"); }
+      if (estado) { estado.textContent = response.estatus === "borrador" || !response.estatus ? "Borrador" : "Solicitud guardada"; estado.className = "badge badge-warning"; }
+      if (!options.quiet) { showAlert("Cotización guardada: " + (response.folio || "borrador"), "ok"); }
       return response;
     });
   }
@@ -121,7 +121,7 @@
     if (!draft) { return; }
     writeCart(Array.isArray(draft.items) ? draft.items : []);
     renderCart();
-    showAlert("Cotizacion cargada: " + (draft.nombre || "Cotizacion"), "ok");
+    showAlert("Cotización cargada: " + (draft.nombre || "Cotizacion"), "ok");
   }
 
   function deleteDraft(id) {
@@ -209,16 +209,25 @@
     return payload;
   }
 
+  function validateItemsPayload(payload, emptyMessage) {
+    if (!payload.items || !payload.items.length) { return emptyMessage || "Agrega al menos un producto antes de revisar la solicitud."; }
+    var invalid = payload.items.some(function (item) {
+      return !item || !Number.isFinite(Number(item.id_sku)) || Number(item.id_sku) <= 0 || !Number.isFinite(Number(item.cantidad)) || Number(item.cantidad) < 1;
+    });
+    return invalid ? "Cada producto debe tener cantidad mínima de 1." : "";
+  }
+
   function validatePedidoPayload(payload) {
-    if (!payload.items.length) { return "Agrega al menos un producto antes de enviar el pedido."; }
+    var itemError = validateItemsPayload(payload, "Agrega al menos un producto antes de enviar la solicitud.");
+    if (itemError) { return itemError; }
     if (!payload.requiere_factura) { return ""; }
     var required = {
       rfc: "RFC",
       razon_social: "razon social",
       regimen_fiscal: "regimen fiscal",
       uso_cfdi: "uso CFDI",
-      codigo_postal_fiscal: "codigo postal fiscal",
-      correo_facturacion: "correo de facturacion"
+      codigo_postal_fiscal: "código postal fiscal",
+      correo_facturacion: "correo de facturación"
     };
     var missing = Object.keys(required).filter(function (field) { return !String(payload.facturacion[field] || "").trim(); });
     if (missing.length) { return "Completa los datos fiscales: " + missing.map(function (field) { return required[field]; }).join(", ") + "."; }
@@ -251,7 +260,7 @@
       cart.push({id_sku: Number(idSku), nombre: nombre || "Producto", cantidad: qty, comentario: comentario || ""});
     }
     writeCart(cart);
-    if (redirect !== false) { window.location.href = root + "/cotizacion"; } else { showInlineAdded(button, "Agregado a cotizacion"); }
+    if (redirect !== false) { window.location.href = root + "/cotizacion"; } else { showInlineAdded(button, "Agregado a cotización"); }
   }
 
   function snapshotBySku(response) {
@@ -265,7 +274,7 @@
     if (!container) { return; }
     var cart = readCart();
     if (!cart.length) {
-      container.innerHTML = "<tr><td colspan=\"6\" class=\"empty-row\">Agrega productos desde el catalogo o Mi catalogo.</td></tr>";
+      container.innerHTML = "<tr><td colspan=\"6\" class=\"empty-row\">Agrega productos desde el catálogo o Mi catálogo.</td></tr>";
     } else {
       container.innerHTML = cart.map(function (item) {
         var snap = snapshot && snapshot[item.id_sku] ? snapshot[item.id_sku] : {};
@@ -303,7 +312,7 @@
     var requiereFactura = isChecked("pedido_requiere_factura") ? 1 : 0;
     var entrega = readEntrega();
     return {
-      items: cart.map(function (item) { return {id_sku: Number(item.id_sku), cantidad: Number(item.cantidad || 1)}; }),
+      items: cart.map(function (item) { return {id_sku: Number(item.id_sku), cantidad: Number(item.cantidad)}; }),
       entrega: entrega,
       tipo_entrega: entrega.tipo_entrega,
       direccion_envio: entrega.direccion_envio,
@@ -318,11 +327,11 @@
     var subtotal = document.getElementById("cotizacion_subtotal");
     var estado = document.getElementById("cotizacion_estado");
     if (subtotal) { subtotal.textContent = money(response.totales ? response.totales.total_estimado : null); }
-    if (estado) { estado.textContent = response.bloqueos && response.bloqueos.length ? "Revision" : "Listo"; estado.className = "badge " + (response.bloqueos && response.bloqueos.length ? "badge-warning" : "badge-success"); }
-    showAlert(response.mensaje || (response.error ? "No fue posible revisar el pedido" : "Pedido revisado con ERP"), response.error ? "warn" : "ok");
+    if (estado) { estado.textContent = response.bloqueos && response.bloqueos.length ? "Revisión" : "Listo"; estado.className = "badge " + (response.bloqueos && response.bloqueos.length ? "badge-warning" : "badge-success"); }
+    showAlert(response.mensaje || (response.error ? "No fue posible revisar la solicitud" : "Solicitud revisada correctamente."), response.error ? "warn" : "ok");
   }
 
-  function revisarCotizacion() { postJson("/cotizacion/dryrun", payloadCart()).then(applyDryRun).catch(function () { showAlert("No se pudo revisar el pedido con el ERP"); }); }
+  function revisarCotizacion() { var payload = payloadCart(); var error = validateItemsPayload(payload, "Agrega al menos un producto antes de revisar la solicitud."); if (error) { showAlert(error); return; } postJson("/cotizacion/dryrun", payload).then(applyDryRun).catch(function () { showAlert("No se pudo revisar la solicitud."); }); }
 
   function enviarCotizacion() {
     var payload = payloadCart();
@@ -339,15 +348,15 @@
         facturacion: payload.facturacion
       });
     }).then(function (response) {
-      if (response.error) { showAlert(response.mensaje || "No se pudo enviar el pedido"); return; }
+      if (response.error) { showAlert(response.mensaje || "No se pudo enviar la solicitud"); return; }
       writeCart([]); clearEditState(); renderCart();
       var subtotal = document.getElementById("cotizacion_subtotal");
       var estado = document.getElementById("cotizacion_estado");
       if (subtotal) { subtotal.textContent = money(response.total_estimado); }
-      if (estado) { estado.textContent = response.estatus_pedido || "Pedido solicitado"; estado.className = "badge badge-success"; }
-      showAlert("Pedido registrado: " + (response.folio_pedido || response.folio || "sin folio"), "ok");
+      if (estado) { estado.textContent = response.estatus_pedido || "Solicitud enviada"; estado.className = "badge badge-success"; }
+      showAlert("Solicitud enviada: " + (response.folio_pedido || response.folio || "sin folio"), "ok");
       window.setTimeout(function () { window.location.href = root + "/pedidos"; }, 900);
-    }).catch(function () { showAlert("No se pudo enviar el pedido al ERP"); });
+    }).catch(function () { showAlert("No se pudo enviar la solicitud."); });
   }
   function changeQty(row, delta) {
     var idSku = row.getAttribute("data-id-sku");
@@ -361,7 +370,7 @@
     var cart = readCart();
     cart.forEach(function (item) {
       if (String(item.id_sku) === String(idSku)) {
-        if (field === "cantidad") { item.cantidad = Math.max(1, Number(String(target.value).replace(/\D/g, "") || 1)); } else { item.comentario = target.value; }
+        if (field === "cantidad") { var cleanQty = Number(String(target.value).replace(/\D/g, "")); item.cantidad = Math.max(1, cleanQty || 1); target.value = item.cantidad; } else { item.comentario = target.value; }
       }
     });
     writeCart(cart);
@@ -493,7 +502,7 @@ var originalTableHtml = null;
       html += "<button class=\"btn btn-light btn-sm mi-catalogo-toggle " + (saved ? "is-saved" : "") + "\" type=\"button\" data-mi-catalogo-toggle data-id-sku=\"" + escapeHtml(idSku) + "\" data-estatus=\"" + (saved ? "inactivo" : "activo") + "\">" + (saved ? "En Mi catálogo" : "Agregar a Mi catálogo") + "</button>";
     }
     if (acciones.agregar_cotizacion) {
-      html += "<button class=\"btn btn-primary btn-sm\" type=\"button\" data-add-cotizacion data-id-sku=\"" + escapeHtml(idSku) + "\" data-nombre=\"" + escapeHtml(item.nombre || "Producto") + "\">Agregar a cotizacion</button>";
+      html += "<button class=\"btn btn-primary btn-sm\" type=\"button\" data-add-cotizacion data-id-sku=\"" + escapeHtml(idSku) + "\" data-nombre=\"" + escapeHtml(item.nombre || "Producto") + "\">Agregar a cotización</button>";
     } else if (acciones.solicitar_precio) {
       html += "<a class=\"btn btn-light btn-sm\" href=\"" + escapeHtml(data.url_raiz) + "/auth/registro\">Solicitar precio</a>";
     }
@@ -544,12 +553,12 @@ var originalTableHtml = null;
       return;
     }
     var matches = data.items.filter(function (item) { return itemSearchText(item).indexOf(query) !== -1; });
-    tableBody.innerHTML = matches.length ? matches.map(function (item) { return renderTableRow(item, data); }).join("") : "<tr><td colspan=\"8\" class=\"empty-row\">Sin coincidencias en el catalogo cargado.</td></tr>";
+    tableBody.innerHTML = matches.length ? matches.map(function (item) { return renderTableRow(item, data); }).join("") : "<tr><td colspan=\"8\" class=\"empty-row\">Sin coincidencias en los productos cargados.</td></tr>";
     if (cardList) { cardList.innerHTML = matches.map(function (item) { return renderCard(item, data); }).join(""); }
     var counter = document.querySelector("[data-local-filter-count]");
     if (counter) { counter.textContent = matches.length + " coincidencias"; }
     var status = document.querySelector("[data-catalog-filter-status]");
-    if (status) { status.textContent = data.items.length + " productos cargados para filtro"; }
+    if (status) { status.textContent = data.items.length + " productos disponibles para búsqueda"; }
   }
 
   document.addEventListener("input", function (event) {
@@ -559,6 +568,21 @@ var originalTableHtml = null;
 })();
 
 (function () {
+  function pedidoStatusLabel(value) {
+    var map = {pedido_solicitado: "Pedido recibido", en_revision: "En revisión comercial", respondida: "Respuesta enviada", requiere_ajuste_cliente: "Requiere ajuste", cliente_acepto: "Aceptado por cliente", aceptado: "Aceptado por cliente", cliente_rechazo: "Rechazado por cliente", rechazado: "Rechazado por cliente", cancelado: "Cancelado", terminado: "Completado", completado: "Completado", sin_estatus: "En revisión"};
+    return map[value] || "En revisión";
+  }
+
+  function entregaLabel(value) {
+    var map = {por_definir: "Entrega por confirmar", envio: "Envío", recoger_tienda: "Recoger en tienda"};
+    return map[value] || "Entrega por confirmar";
+  }
+
+  function revisionLabel(value) {
+    var map = {por_confirmar: "Por confirmar", disponible: "Disponible", no_disponible: "No disponible", parcial: "Parcial", pendiente: "Pendiente de revisión"};
+    return map[value] || (value ? String(value).replace(/_/g, " ") : "Por confirmar");
+  }
+
   function setText(selector, value) {
     var node = document.querySelector(selector);
     if (node) { node.textContent = value || ""; }
@@ -701,8 +725,23 @@ var originalTableHtml = null;
   }
 
   function money(value) {
-    if (value === null || value === undefined || value === "" || isNaN(Number(value))) { return "Pendiente de revision"; }
+    if (value === null || value === undefined || value === "" || isNaN(Number(value))) { return "Pendiente de revisión"; }
     return "$" + Number(value).toLocaleString("es-MX", {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  }
+
+  function pedidoStatusLabel(value) {
+    var map = {pedido_solicitado: "Pedido recibido", en_revision: "En revisión comercial", respondida: "Respuesta enviada", requiere_ajuste_cliente: "Requiere ajuste", cliente_acepto: "Aceptado por cliente", aceptado: "Aceptado por cliente", cliente_rechazo: "Rechazado por cliente", rechazado: "Rechazado por cliente", cancelado: "Cancelado", terminado: "Completado", completado: "Completado", sin_estatus: "En revisión"};
+    return map[value] || "En revisión";
+  }
+
+  function entregaLabel(value) {
+    var map = {por_definir: "Entrega por confirmar", envio: "Envío", recoger_tienda: "Recoger en tienda"};
+    return map[value] || "Entrega por confirmar";
+  }
+
+  function revisionLabel(value) {
+    var map = {por_confirmar: "Por confirmar", disponible: "Disponible", no_disponible: "No disponible", parcial: "Parcial", pendiente: "Pendiente de revisión"};
+    return map[value] || (value ? String(value).replace(/_/g, " ") : "Por confirmar");
   }
 
   function setText(selector, value) {
@@ -732,26 +771,26 @@ var originalTableHtml = null;
   }
 
   function renderPedidoDetalle(response) {
-    if (response.error) { showPedidoAlert(response.mensaje || "No se pudo consultar el pedido"); return; }
+    if (response.error) { showPedidoAlert(response.mensaje || "No se pudo consultar la solicitud"); return; }
     currentPedido = response.pedido || null;
     currentPedidoItems = Array.isArray(response.items) ? response.items : [];
     var modal = document.querySelector("[data-pedido-modal]");
     var body = document.querySelector("[data-pedido-modal-items]");
     if (!modal || !body || !currentPedido) { return; }
     setText("[data-pedido-modal-folio]", currentPedido.folio || "Pedido");
-    setText("[data-pedido-modal-title]", "Detalle de pedido");
-    setText("[data-pedido-modal-status]", "Estatus: " + (currentPedido.estatus || "sin_estatus") + " | Entrega: " + (currentPedido.tipo_entrega || "por_definir"));
+    setText("[data-pedido-modal-title]", "Detalle de solicitud");
+    setText("[data-pedido-modal-status]", "Estatus: " + pedidoStatusLabel(currentPedido.estatus || "sin_estatus") + " | Entrega: " + entregaLabel(currentPedido.tipo_entrega || "por_definir"));
     body.innerHTML = currentPedidoItems.length ? currentPedidoItems.map(function (item) {
       var nombre = item.producto_actual || item.nombre_snapshot || "Producto";
       var sku = item.sku_actual || item.sku_snapshot || item.id_sku || "";
       return "<tr>" +
-        "<td><strong>" + escapeHtml(nombre) + "</strong><small class=\"line-muted\">ID SKU " + escapeHtml(item.id_sku || "") + "</small></td>" +
+        "<td><strong>" + escapeHtml(nombre) + "</strong></td>" +
         "<td><span class=\"badge badge-light\">" + escapeHtml(sku) + "</span></td>" +
         "<td>" + escapeHtml(item.cantidad || "0") + "</td>" +
-        "<td>" + escapeHtml(item.cantidad_confirmada || "Pendiente de revision") + "</td>" +
+        "<td>" + escapeHtml(item.cantidad_confirmada || "Pendiente de revisión") + "</td>" +
         "<td class=\"fw-bold\">" + money(item.precio_unitario_snapshot) + "</td>" +
         "<td class=\"fw-bold\">" + money(item.subtotal_snapshot) + "</td>" +
-        "<td><span class=\"badge badge-info\">" + escapeHtml(item.estatus_revision || item.disponibilidad_snapshot || "por_confirmar") + "</span><small class=\"line-muted\">" + escapeHtml(item.comentario_revision || "") + "</small></td>" +
+        "<td><span class=\"badge badge-info\">" + escapeHtml(revisionLabel(item.estatus_revision || item.disponibilidad_snapshot || "por_confirmar")) + "</span><small class=\"line-muted\">" + escapeHtml(item.comentario_revision || "") + "</small></td>" +
       "</tr>";
     }).join("") : "<tr><td colspan=\"7\" class=\"empty-row\">Sin partidas en este pedido.</td></tr>";
     var alert = document.querySelector("[data-pedido-modal-alert]");
@@ -760,13 +799,13 @@ var originalTableHtml = null;
   }
 
   function repetirPedido() {
-    if (!currentPedidoItems.length) { showPedidoAlert("Este pedido no tiene partidas para volver a cotizar."); return; }
+    if (!currentPedidoItems.length) { showPedidoAlert("Esta solicitud no tiene productos para crear una nueva."); return; }
     var items = currentPedidoItems.map(function (item) {
       return {
         id_sku: Number(item.id_sku),
         nombre: item.producto_actual || item.nombre_snapshot || "Producto",
         cantidad: Number(item.cantidad_confirmada || item.cantidad || 1) || 1,
-        comentario: "Repedido desde " + (currentPedido && currentPedido.folio ? currentPedido.folio : "pedido anterior")
+        comentario: "Nueva solicitud basada en " + (currentPedido && currentPedido.folio ? currentPedido.folio : "solicitud anterior")
       };
     }).filter(function (item) { return item.id_sku > 0; });
     localStorage.setItem(cartKey, JSON.stringify(items));
@@ -782,16 +821,16 @@ var originalTableHtml = null;
       comentario: comentario ? comentario.value : "",
       tipo_entrega: currentPedido.tipo_entrega || "por_definir"
     }).then(function (response) {
-      if (response.error) { showPedidoAlert(response.mensaje || "No se pudo responder el pedido"); return; }
+      if (response.error) { showPedidoAlert(response.mensaje || "No se pudo responder la solicitud"); return; }
       showPedidoAlert(response.mensaje || "Respuesta registrada", true);
       window.setTimeout(function () { window.location.reload(); }, 900);
-    }).catch(function () { showPedidoAlert("No se pudo responder el pedido"); });
+    }).catch(function () { showPedidoAlert("No se pudo responder la solicitud"); });
   }
 
   document.addEventListener("click", function (event) {
     var open = event.target.closest("[data-open-pedido-detalle]");
     if (open) {
-      fetchJson("/pedidos/detalle?id_cotizacion_distribucion=" + encodeURIComponent(open.getAttribute("data-id"))).then(renderPedidoDetalle).catch(function () { showPedidoAlert("No se pudo consultar el pedido"); });
+      fetchJson("/pedidos/detalle?id_cotizacion_distribucion=" + encodeURIComponent(open.getAttribute("data-id"))).then(renderPedidoDetalle).catch(function () { showPedidoAlert("No se pudo consultar la solicitud"); });
       return;
     }
     if (event.target.closest("[data-close-pedido-modal]") || event.target.matches("[data-pedido-modal]")) { closePedidoModal(); return; }
@@ -828,7 +867,7 @@ var originalTableHtml = null;
   }
 
   function money(value) {
-    if (value === null || value === undefined || value === "" || isNaN(Number(value))) { return "Pendiente de revision"; }
+    if (value === null || value === undefined || value === "" || isNaN(Number(value))) { return "Pendiente de revisión"; }
     return "$" + Number(value).toLocaleString("es-MX", {minimumFractionDigits: 2, maximumFractionDigits: 2});
   }
 
@@ -853,33 +892,58 @@ var originalTableHtml = null;
     if (modal) { modal.classList.add("is-hidden"); }
   }
 
+  function pedidoStatusLabel(value) {
+    var map = {pedido_solicitado: "Pedido recibido", en_revision: "En revisión comercial", respondida: "Respuesta enviada", requiere_ajuste_cliente: "Requiere ajuste", cliente_acepto: "Aceptado por cliente", aceptado: "Aceptado por cliente", cliente_rechazo: "Rechazado por cliente", rechazado: "Rechazado por cliente", cancelado: "Cancelado", terminado: "Completado", completado: "Completado", sin_estatus: "En revisión"};
+    return map[value] || "En revisión";
+  }
+
+  function entregaLabel(value) {
+    var map = {por_definir: "Entrega por confirmar", envio: "Envío", recoger_tienda: "Recoger en tienda"};
+    return map[value] || "Entrega por confirmar";
+  }
+
+  function revisionLabel(value) {
+    var map = {por_confirmar: "Por confirmar", disponible: "Disponible", no_disponible: "No disponible", parcial: "Parcial", pendiente: "Pendiente de revisión"};
+    return map[value] || (value ? String(value).replace(/_/g, " ") : "Por confirmar");
+  }
+
   function setText(selector, value) {
     var node = document.querySelector(selector);
     if (node) { node.textContent = value || ""; }
   }
 
+  function cotizacionStatusLabel(value) {
+    var map = {borrador: "Borrador", recibida: "Recibida por Artiani", enviada_como_pedido: "Solicitud enviada", pedido_solicitado: "Pedido recibido", cancelada: "Cancelada", vencida: "Vencida", sin_estatus: "En revisión"};
+    return map[value] || "En revisión";
+  }
+
+  function disponibilidadLabel(value) {
+    var map = {por_revisar: "Por revisar", por_confirmar: "Por confirmar", disponible: "Disponible", no_disponible: "No disponible", parcial: "Parcial"};
+    return map[value] || (value ? String(value).replace(/_/g, " ") : "Por revisar");
+  }
+
   function renderDetalle(response) {
-    if (response.error) { feedback(response.mensaje || "No se pudo consultar la cotizacion"); return; }
+    if (response.error) { feedback(response.mensaje || "No se pudo consultar la cotización"); return; }
     current = response.cotizacion || null;
     currentItems = Array.isArray(response.items) ? response.items : [];
     var modal = document.querySelector("[data-cotizacion-modal]");
     var body = document.querySelector("[data-cotizacion-modal-items]");
     if (!modal || !body || !current) { return; }
-    setText("[data-cotizacion-modal-folio]", current.folio || "Cotizacion");
-    setText("[data-cotizacion-modal-title]", current.nombre_documento || "Detalle de cotizacion");
-    setText("[data-cotizacion-modal-status]", "Estatus: " + (current.estatus || "sin_estatus") + " | Total estimado: " + money(current.total_estimado));
+    setText("[data-cotizacion-modal-folio]", current.folio || "Cotización");
+    setText("[data-cotizacion-modal-title]", current.nombre_documento || "Detalle de cotización");
+    setText("[data-cotizacion-modal-status]", "Estatus: " + cotizacionStatusLabel(current.estatus || "sin_estatus") + " | Total estimado: " + money(current.total_estimado));
     body.innerHTML = currentItems.length ? currentItems.map(function (item) {
       var nombre = item.producto_actual || item.nombre_snapshot || "Producto";
       var sku = item.sku_actual || item.sku_snapshot || item.id_sku || "";
       return "<tr>" +
-        "<td><strong>" + escapeHtml(nombre) + "</strong><small class=\"line-muted\">ID SKU " + escapeHtml(item.id_sku || "") + "</small></td>" +
+        "<td><strong>" + escapeHtml(nombre) + "</strong></td>" +
         "<td><span class=\"badge badge-light\">" + escapeHtml(sku) + "</span></td>" +
         "<td>" + escapeHtml(item.cantidad || "0") + "</td>" +
         "<td class=\"fw-bold\">" + money(item.precio_unitario_snapshot) + "</td>" +
         "<td class=\"fw-bold\">" + money(item.subtotal_snapshot) + "</td>" +
-        "<td><span class=\"badge badge-info\">" + escapeHtml(item.disponibilidad_snapshot || "por_revisar") + "</span></td>" +
+        "<td><span class=\"badge badge-info\">" + escapeHtml(disponibilidadLabel(item.disponibilidad_snapshot || "por_revisar")) + "</span></td>" +
       "</tr>";
-    }).join("") : "<tr><td colspan=\"6\" class=\"empty-row\">Sin partidas en esta cotizacion.</td></tr>";
+    }).join("") : "<tr><td colspan=\"6\" class=\"empty-row\">Sin partidas en esta cotización.</td></tr>";
     var editable = current.estatus === "borrador";
     document.querySelectorAll("[data-cotizacion-modal-edit], [data-cotizacion-modal-send]").forEach(function (button) { button.classList.toggle("is-hidden", !editable); });
     var alert = document.querySelector("[data-cotizacion-modal-alert]");
@@ -901,37 +965,37 @@ var originalTableHtml = null;
       id_cotizacion_distribucion: cotizacion.id_cotizacion_distribucion,
       folio: cotizacion.folio,
       estatus: cotizacion.estatus,
-      nombre: cotizacion.nombre_documento || "Cotizacion"
+      nombre: cotizacion.nombre_documento || "Cotización"
     }));
     window.location.href = root + "/cotizacion";
   }
 
   function openDetalle(id) {
-    fetchJson("/cotizaciones/detalle?id_cotizacion_distribucion=" + encodeURIComponent(id)).then(renderDetalle).catch(function () { feedback("No se pudo consultar la cotizacion"); });
+    fetchJson("/cotizaciones/detalle?id_cotizacion_distribucion=" + encodeURIComponent(id)).then(renderDetalle).catch(function () { feedback("No se pudo consultar la cotización"); });
   }
 
   function editarDesdeFila(row) {
     fetchJson("/cotizaciones/detalle?id_cotizacion_distribucion=" + encodeURIComponent(row.getAttribute("data-id"))).then(function (response) {
-      if (response.error) { feedback(response.mensaje || "No se pudo cargar la cotizacion"); return; }
+      if (response.error) { feedback(response.mensaje || "No se pudo cargar la cotización"); return; }
       loadToEditor(response.cotizacion, response.items || []);
-    }).catch(function () { feedback("No se pudo cargar la cotizacion"); });
+    }).catch(function () { feedback("No se pudo cargar la cotización"); });
   }
 
   function duplicar(id) {
     postJson("/cotizaciones/duplicar", {id_cotizacion_distribucion: Number(id)}).then(function (response) {
-      if (response.error) { feedback(response.mensaje || "No se pudo duplicar la cotizacion"); return; }
-      feedback(response.mensaje || "Cotizacion duplicada", true);
+      if (response.error) { feedback(response.mensaje || "No se pudo duplicar la cotización"); return; }
+      feedback(response.mensaje || "Cotización duplicada", true);
       window.setTimeout(function () { window.location.reload(); }, 700);
-    }).catch(function () { feedback("No se pudo duplicar la cotizacion"); });
+    }).catch(function () { feedback("No se pudo duplicar la cotización"); });
   }
 
   function cancelar(id) {
-    if (!window.confirm("¿Cancelar esta cotizacion?")) { return; }
+    if (!window.confirm("¿Cancelar esta cotización?")) { return; }
     postJson("/cotizaciones/cancelar", {id_cotizacion_distribucion: Number(id)}).then(function (response) {
-      if (response.error) { feedback(response.mensaje || "No se pudo cancelar la cotizacion"); return; }
-      feedback(response.mensaje || "Cotizacion cancelada", true);
+      if (response.error) { feedback(response.mensaje || "No se pudo cancelar la cotización"); return; }
+      feedback(response.mensaje || "Cotización cancelada", true);
       window.setTimeout(function () { window.location.reload(); }, 700);
-    }).catch(function () { feedback("No se pudo cancelar la cotizacion"); });
+    }).catch(function () { feedback("No se pudo cancelar la cotización"); });
   }
 
   function enviarPedido(id) {
@@ -942,10 +1006,10 @@ var originalTableHtml = null;
       requiere_factura: 0,
       facturacion: {rfc: "", razon_social: "", regimen_fiscal: "", uso_cfdi: "", codigo_postal_fiscal: "", correo_facturacion: "", comentarios_facturacion: ""}
     }).then(function (response) {
-      if (response.error) { feedback(response.mensaje || "No se pudo enviar la cotizacion como pedido"); return; }
-      feedback("Pedido generado: " + (response.folio_pedido || response.folio || "sin folio"), true);
+      if (response.error) { feedback(response.mensaje || "No se pudo enviar la solicitud"); return; }
+      feedback("Solicitud enviada: " + (response.folio_pedido || response.folio || "sin folio"), true);
       window.setTimeout(function () { window.location.href = root + "/pedidos"; }, 900);
-    }).catch(function () { feedback("No se pudo enviar la cotizacion como pedido"); });
+    }).catch(function () { feedback("No se pudo enviar la solicitud"); });
   }
 
   document.addEventListener("click", function (event) {

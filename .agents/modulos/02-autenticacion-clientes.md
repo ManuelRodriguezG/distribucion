@@ -104,3 +104,11 @@ Construir registro, login, sesion externa, recuperacion futura y perfil de clien
 - `/` queda como home publica para usuarios sin sesion, con acciones claras hacia `/auth/login` y `/auth/registro`.
 - Las rutas protegidas siguen usando `requerirCliente()` y redirigen a `/auth/login?motivo=ruta_protegida`.
 - El dashboard privado se mantiene para usuarios autenticados y no se mezcla con el layout publico.
+
+## Ajuste 2026-10-06 - Cierre profesional de registro
+
+- Cuando `POST /DistribucionApi/auth/registro` responde sin error, la vista muestra una confirmacion fuerte con folio, siguiente paso y acciones a login/inicio; el formulario queda oculto para evitar reenvios accidentales.
+- El frontend queda preparado para tratar `solicitud_existente`, `cliente_existente`, `cuenta_en_revision` y `requiere_activacion` como estados informativos, no como error generico.
+- Los errores de campos se traducen a etiquetas legibles para cliente, incluyendo campos fiscales como RFC, razon social, regimen fiscal, uso CFDI, codigo postal fiscal y correo de facturacion.
+- Si el registro falla por validacion, el formulario conserva los datos capturados y, cuando es posible, las categorias de interes seleccionadas.
+- El boton de envio se deshabilita al enviar y cambia a `Enviando solicitud...` para reducir doble clic; el bloqueo real de duplicados sigue siendo responsabilidad de la API.

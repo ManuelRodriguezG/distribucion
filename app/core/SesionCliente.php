@@ -2,6 +2,7 @@
 
 class SesionCliente {
   public static function iniciar($perfil, $token) {
+    if (session_status() === PHP_SESSION_ACTIVE) { session_regenerate_id(true); }
     $_SESSION['distribucion_cliente'] = array(
       'perfil' => self::normalizarPerfil($perfil),
       'token' => $token,

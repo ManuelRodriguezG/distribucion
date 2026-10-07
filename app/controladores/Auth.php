@@ -36,8 +36,9 @@ class Auth extends Controlador {
     $categorias = $api->categoriasInteres();
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-      $respuesta = $api->registrar($this->normalizarSolicitudRegistro($_POST));
-      $this->renderAuth('registro', array('titulo' => 'Solicitud de acceso', 'respuesta' => $respuesta, 'categorias' => $categorias));
+      $solicitud = $this->normalizarSolicitudRegistro($_POST);
+      $respuesta = $this->normalizarRespuestaRegistro($api->registrar($solicitud));
+      $this->renderAuth('registro', array('titulo' => 'Solicitud de acceso', 'respuesta' => $respuesta, 'categorias' => $categorias, 'solicitud' => $solicitud));
       return;
     }
 
@@ -115,13 +116,14 @@ class Auth extends Controlador {
     $estatus = isset($respuesta['estatus']) ? trim((string) $respuesta['estatus']) : '';
     $mensajes = array(
       'cuenta_pendiente' => 'Tu solicitud fue recibida y sigue pendiente de revision comercial.',
-      'cuenta_en_revision' => 'Tu solicitud sigue en revision. El ERP debe habilitar tu acceso antes de ver catalogo o precios.',
+      'cuenta_en_revision' => 'Tu solicitud sigue en revision. Te avisaremos cuando el acceso este habilitado.',
       'cuenta_rechazada' => 'Tu solicitud no fue aprobada. Contacta a Artiani para revisar alternativas.',
       'cuenta_suspendida' => 'Tu acceso esta suspendido. Contacta a Artiani para revisar tu cuenta.',
-      'requiere_activacion' => 'Necesitas crear tu contrasena desde el enlace de activacion.',
-      'contrasenia_no_creada' => 'Necesitas crear tu contrasena desde el enlace de activacion.',
-      'sin_permisos_comerciales' => 'Tu acceso comercial aun no tiene permisos habilitados por el ERP.',
-      'credenciales_invalidas' => 'No pudimos iniciar sesion. Revisa tu correo y contrasena. Si aun no tienes acceso aprobado o contrasena activa, solicita acceso comercial o contacta a Artiani.'
+      'requiere_activacion' => 'Necesitas activar tu acceso o crear contrasena con el enlace enviado.',
+      'contrasenia_no_creada' => 'Necesitas activar tu acceso o crear contrasena con el enlace enviado.',
+      'cliente_existente' => 'Este correo ya tiene cuenta. Inicia sesion o solicita ayuda si no recuerdas tu acceso.',
+      'sin_permisos_comerciales' => 'Tu acceso comercial aun esta en revision.',
+      'credenciales_invalidas' => 'No pudimos iniciar sesion. Revisa correo y contrasena.'
     );
 
     if ($codigo !== '' && isset($mensajes[$codigo])) {
@@ -138,7 +140,7 @@ class Auth extends Controlador {
   private function mensajePorEstatus($estatus) {
     $estatus = strtolower(trim((string) $estatus));
     if ($estatus === 'pendiente' || $estatus === 'en_revision') {
-      return 'Tu solicitud sigue en revision. El ERP debe habilitar tu acceso antes de ver catalogo o precios.';
+      return 'Tu solicitud sigue en revision. Te avisaremos cuando el acceso este habilitado.';
     }
     if ($estatus === 'rechazado') {
       return 'Tu solicitud no fue aprobada. Contacta a Artiani para revisar alternativas.';
@@ -146,13 +148,32 @@ class Auth extends Controlador {
     if ($estatus === 'suspendido') {
       return 'Tu acceso esta suspendido. Contacta a Artiani para revisar tu cuenta.';
     }
-    return 'No pudimos iniciar sesion. Revisa tu correo y contrasena. Si aun no tienes acceso aprobado o contrasena activa, solicita acceso comercial o contacta a Artiani.';
+    return 'No pudimos iniciar sesion. Revisa correo y contrasena.';
+  }
+
+  private function normalizarRespuestaRegistro($respuesta) {
+    $respuesta = is_array($respuesta) ? $respuesta : array('error' => true);
+    $codigo = isset($respuesta['codigo']) ? trim((string) $respuesta['codigo']) : '';
+    $mensajes = array(
+      'solicitud_existente' => 'Ya tenemos una solicitud asociada a este correo.',
+      'cliente_existente' => 'Este correo ya tiene cuenta. Inicia sesion o solicita ayuda si no recuerdas tu acceso.',
+      'solicitud_rechazada' => 'La solicitud asociada a este correo no fue aprobada. Contacta a Artiani para revisar alternativas.',
+      'cuenta_suspendida' => 'El acceso asociado a este correo esta suspendido. Contacta a Artiani para revisar tu cuenta.',
+      'cuenta_en_revision' => 'Tu solicitud sigue en revision. Te contactaremos cuando el acceso este habilitado.',
+      'requiere_activacion' => 'Necesitas activar tu acceso o crear contrasena con el enlace enviado.',
+      'campos_fiscales_requeridos' => 'Completa los datos fiscales requeridos para guardar tu preferencia de facturacion.',
+      'campos_requeridos' => 'Completa los campos requeridos para enviar tu solicitud.'
+    );
+    if ($codigo !== '' && isset($mensajes[$codigo])) {
+      $respuesta['mensaje'] = $mensajes[$codigo];
+    }
+    return $respuesta;
   }
 
   private function contextoLogin() {
     $contexto = array();
     if (!empty($_GET['motivo']) && $_GET['motivo'] === 'ruta_protegida') {
-      $contexto['mensaje'] = 'Inicia sesion para continuar. El catalogo, cotizaciones y cuenta requieren acceso mayorista aprobado o en revision.';
+      $contexto['mensaje'] = 'Inicia sesion para continuar. El catalogo, cotizaciones y cuenta requieren acceso comercial autorizado o una solicitud en revision.';
     }
     if (!empty($_SESSION['distribucion_destino_post_login'])) {
       $contexto['ruta'] = $_SESSION['distribucion_destino_post_login'];

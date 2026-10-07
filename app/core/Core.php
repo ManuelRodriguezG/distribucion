@@ -14,15 +14,28 @@ class Core {
       if ($controlador !== null) {
         $this->controladorActual = $controlador;
         unset($url[0]);
+      } else {
+        $this->responder404();
+        return;
       }
     }
 
     require_once RUTA_APP . '/controladores/' . $this->controladorActual . '.php';
     $this->controladorActual = new $this->controladorActual;
 
-    if (!empty($url[1]) && method_exists($this->controladorActual, $url[1])) {
-      $this->metodoActual = $url[1];
-      unset($url[1]);
+    if (!empty($url[1])) {
+      if (method_exists($this->controladorActual, $url[1])) {
+        $this->metodoActual = $url[1];
+        unset($url[1]);
+      } else {
+        $this->responder404();
+        return;
+      }
+    }
+
+    if (!method_exists($this->controladorActual, $this->metodoActual)) {
+      $this->responder404();
+      return;
     }
 
     $this->parametros = $url ? array_values($url) : array();
@@ -30,6 +43,11 @@ class Core {
     if ($resultado !== null) {
       echo $resultado;
     }
+  }
+
+  private function responder404() {
+    http_response_code(404);
+    echo 'Página no encontrada';
   }
 
   public function getUrl() {

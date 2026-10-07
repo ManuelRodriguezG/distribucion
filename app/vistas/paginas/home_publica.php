@@ -1,15 +1,29 @@
 <section class="public-banner">
   <div class="public-banner-media" aria-hidden="true"></div>
   <div class="public-banner-content">
-    <span class="badge badge-primary">Artiani Distribucion</span>
     <h1>Artiani Distribucion</h1>
-    <p class="public-lead">Acceso comercial para negocios, tiendas y revendedores.</p>
+    <p class="public-lead">Acceso comercial para negocios y comercios especializados.</p>
     <p>Encuentra lineas para mascotas, acuario y productos especializados con atencion comercial de Artiani.</p>
     <div class="public-hero-actions">
       <a class="btn btn-primary" href="<?php echo URL_RAIZ; ?>/auth/registro"><span class="icon icon-send" aria-hidden="true"></span>Solicitar acceso comercial</a>
       <a class="btn btn-light" href="<?php echo URL_RAIZ; ?>/auth/login"><span class="icon icon-login" aria-hidden="true"></span>Iniciar sesion</a>
     </div>
   </div>
+</section>
+
+<section class="public-conversion-grid">
+  <article class="public-conversion-card">
+    <span class="badge badge-info">Clientes actuales</span>
+    <h2>Ya tienes acceso?</h2>
+    <p>Ingresa con tu cuenta para continuar con tu operacion comercial.</p>
+    <a class="btn btn-light" href="<?php echo URL_RAIZ; ?>/auth/login"><span class="icon icon-login" aria-hidden="true"></span>Iniciar sesion</a>
+  </article>
+  <article class="public-conversion-card is-primary">
+    <span class="badge badge-primary">Nuevos negocios</span>
+    <h2>Quieres trabajar con Artiani?</h2>
+    <p>Solicita acceso comercial y comparte la informacion de tu negocio para revision.</p>
+    <a class="btn btn-primary" href="<?php echo URL_RAIZ; ?>/auth/registro"><span class="icon icon-send" aria-hidden="true"></span>Solicitar acceso comercial</a>
+  </article>
 </section>
 
 <section class="public-section public-pet-section">
@@ -19,19 +33,19 @@
     <p>Explora familias de producto que pueden formar parte de tu catalogo autorizado.</p>
   </div>
   <div class="public-pet-grid">
-    <article class="public-pet-card"><span>A</span><strong>Acuario y peces</strong><small>Alimentos, filtracion, iluminacion, peceras y decoracion.</small></article>
-    <article class="public-pet-card"><span>P</span><strong>Perros</strong><small>Accesorios, higiene, paseo, descanso y complementos.</small></article>
-    <article class="public-pet-card"><span>G</span><strong>Gatos</strong><small>Areneros, rascadores, juguetes, comederos y bienestar.</small></article>
-    <article class="public-pet-card"><span>Av</span><strong>Aves</strong><small>Jaulas, alimento, bebederos y accesorios.</small></article>
-    <article class="public-pet-card"><span>R</span><strong>Reptiles y tortugas</strong><small>Terrarios, calefaccion, sustratos y alimentos.</small></article>
-    <article class="public-pet-card"><span>M</span><strong>Pequenos mamiferos</strong><small>Conejo, cuyo, hamster, chinchilla, huron y erizo.</small></article>
+    <article class="public-pet-card"><img src="<?php echo URL_RAIZ; ?>/public/assets/media/home/tienda-revendedores-artiani.webp" alt="Acuario y peces"><strong>Acuario y peces</strong><small>Alimentos, filtracion, iluminacion, peceras y decoracion.</small></article>
+    <article class="public-pet-card"><img src="<?php echo URL_RAIZ; ?>/public/assets/media/home/linea-perros.webp" alt="Perros"><strong>Perros</strong><small>Accesorios, higiene, paseo, descanso y complementos.</small></article>
+    <article class="public-pet-card"><img src="<?php echo URL_RAIZ; ?>/public/assets/media/home/linea-gatos.webp" alt="Gatos"><strong>Gatos</strong><small>Areneros, rascadores, juguetes, comederos y bienestar.</small></article>
+    <article class="public-pet-card"><img src="<?php echo URL_RAIZ; ?>/public/assets/media/home/linea-aves.webp" alt="Aves"><strong>Aves</strong><small>Jaulas, alimento, bebederos y accesorios.</small></article>
+    <article class="public-pet-card"><img src="<?php echo URL_RAIZ; ?>/public/assets/media/home/linea-reptiles-tortugas.webp" alt="Reptiles y tortugas"><strong>Reptiles y tortugas</strong><small>Terrarios, calefaccion, sustratos y alimentos.</small></article>
+    <article class="public-pet-card"><img src="<?php echo URL_RAIZ; ?>/public/assets/media/home/linea-pequenos-mamiferos.webp" alt="Pequenos mamiferos"><strong>Pequenos mamiferos</strong><small>Conejo, cuyo, hamster, chinchilla, huron y erizo.</small></article>
   </div>
 </section>
 
 <section class="public-store-callout">
   <div class="public-store-image" aria-hidden="true"></div>
   <div class="public-store-copy">
-    <span class="badge badge-warning">Para tiendas y revendedores</span>
+    <span class="badge badge-warning">Para comercios especializados</span>
     <h2>Productos para surtir tu negocio con acompanamiento comercial</h2>
     <p>Si necesitas lineas para tu tienda, acuario o negocio especializado, este espacio te ayuda a ordenar tus referencias frecuentes y preparar solicitudes para seguimiento con Artiani.</p>
     <ul class="status-list">
@@ -95,17 +109,3 @@
   </div>
 </section>
 
-<section class="public-conversion-grid">
-  <article class="public-conversion-card">
-    <span class="badge badge-info">Clientes actuales</span>
-    <h2>Ya tienes acceso?</h2>
-    <p>Ingresa con tu cuenta para continuar con tu operacion comercial.</p>
-    <a class="btn btn-light" href="<?php echo URL_RAIZ; ?>/auth/login"><span class="icon icon-login" aria-hidden="true"></span>Iniciar sesion</a>
-  </article>
-  <article class="public-conversion-card is-primary">
-    <span class="badge badge-primary">Nuevos negocios</span>
-    <h2>Quieres vender productos Artiani?</h2>
-    <p>Solicita acceso comercial y comparte la informacion de tu negocio para revision.</p>
-    <a class="btn btn-primary" href="<?php echo URL_RAIZ; ?>/auth/registro"><span class="icon icon-send" aria-hidden="true"></span>Solicitar acceso comercial</a>
-  </article>
-</section>

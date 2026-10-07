@@ -13,8 +13,8 @@ $rutaActual = isset($_GET['url']) ? trim($_GET['url'], '/') : '';
 <body class="public-page" data-url-raiz="<?php echo htmlspecialchars(URL_RAIZ); ?>">
   <header class="public-header">
     <a class="public-brand" href="<?php echo URL_RAIZ; ?>">
-      <span class="brand-mark">A</span>
-      <span><strong>Artiani</strong><small>Distribucion</small></span>
+      <img src="<?php echo URL_RAIZ; ?>/public/assets/media/brand/artiani-logo.png" alt="Artiani Articulos para Animales">
+      <span class="public-brand-tag">Distribucion</span>
     </a>
     <nav class="public-nav" aria-label="Navegacion publica">
       <a class="<?php echo $rutaActual === '' ? 'is-active' : ''; ?>" href="<?php echo URL_RAIZ; ?>">Inicio</a>

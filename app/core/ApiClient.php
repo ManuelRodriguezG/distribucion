@@ -53,8 +53,8 @@ class ApiClient {
     if ($respuesta === false) {
       return array(
         'error' => true,
-        'mensaje' => 'No se pudo conectar con el ERP',
-        'depurar' => array('endpoint' => $url)
+        'mensaje' => 'No pudimos conectar con el servicio comercial. Intenta nuevamente.',
+        'depurar' => array()
       );
     }
 
@@ -62,8 +62,8 @@ class ApiClient {
     if (!is_array($json)) {
       return array(
         'error' => true,
-        'mensaje' => 'Respuesta invalida del ERP',
-        'depurar' => array('endpoint' => $url)
+        'mensaje' => 'No pudimos conectar con el servicio comercial. Intenta nuevamente.',
+        'depurar' => array()
       );
     }
 

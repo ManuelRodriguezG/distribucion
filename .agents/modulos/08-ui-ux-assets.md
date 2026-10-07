@@ -61,3 +61,12 @@ Definir la experiencia visual de Distribucion para clientes externos, manteniend
 - La home mantiene tono sobrio y operativo, sin productos reales, precios, stock, carrusel ni promesas de aprobacion automatica.
 - Se refuerza la home con banner principal visual, seccion "Elige tu mascota" adaptada al contexto B2B y componente para tiendas/revendedores; todos funcionan como orientacion comercial, no como catalogo publico.
 - Se ajusta el copy visible para clientes: un solo hero, tono comercial, sin menciones a ERP, B2B privado, pedidos preliminares ni lenguaje defensivo; el cierre ofrece dos caminos claros, iniciar sesion o solicitar acceso comercial.
+- Se incorpora el logo real de Artiani en el header publico y se agrega "Distribucion" como etiqueta de contexto, sin alterar el archivo de marca original.
+- Se integran assets WebP para la home publica: banner principal, bloque para tiendas/revendedores y tarjetas visuales para acuario, perros, gatos, aves, reptiles/tortugas y pequenos mamiferos.
+
+## Ajuste 2026-10-06 - Auth publico consistente
+
+- `auth.php`, login y registro usan lenguaje comercial publico: Artiani Distribucion, acceso comercial para negocios y solicitud de acceso.
+- Se retiran de pantallas publicas terminos internos como ERP, B2B privado, permisos/listas y lenguaje tecnico.
+- El registro exitoso se presenta como estado final con folio, siguiente paso y acciones claras, sin dejar el formulario visible por defecto.
+- Los errores de API se muestran con etiquetas humanas para que validaciones fiscales o de campos faltantes no aparezcan con nombres tecnicos.

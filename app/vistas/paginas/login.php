@@ -6,7 +6,7 @@ $siguientePaso = isset($respuesta['siguiente_paso']) ? trim((string) $respuesta[
 <article class="card auth-card auth-card-standalone">
   <div class="card-header">
     <div><h2>Iniciar sesion</h2><p>Entra si ya tienes acceso aprobado o contrasena activa.</p></div>
-    <span class="badge badge-info">Portal B2B</span>
+    <span class="badge badge-info">Artiani Distribucion</span>
   </div>
   <?php if (!empty($contexto['mensaje'])): ?><div class="alert alert-warning"><?php echo htmlspecialchars($contexto['mensaje']); ?></div><?php endif; ?>
   <?php if (!empty($respuesta)): ?><div class="alert alert-warning"><?php echo htmlspecialchars(isset($respuesta['mensaje']) ? $respuesta['mensaje'] : 'No fue posible iniciar sesion'); ?><?php if ($siguientePaso !== ''): ?><br><strong><?php echo htmlspecialchars($siguientePaso); ?></strong><?php endif; ?></div><?php endif; ?>
@@ -19,7 +19,7 @@ $siguientePaso = isset($respuesta['siguiente_paso']) ? trim((string) $respuesta[
     <span class="metric-icon icon icon-shield"></span>
     <div>
       <strong>Que necesito para entrar?</strong>
-      <p>Si aun no tienes cuenta, solicita acceso comercial. Si tu solicitud esta en revision, el ERP debe habilitar catalogo, precios y cotizacion antes de que puedas operar.</p>
+      <p>Si aun no tienes cuenta, solicita acceso comercial. Si tu solicitud esta en revision, Artiani te avisara cuando el catalogo, precios y cotizacion esten disponibles para tu negocio.</p>
     </div>
   </div>
   <ul class="status-list compact">

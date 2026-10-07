@@ -17,9 +17,9 @@ $titulo = isset($datos['titulo']) ? $datos['titulo'] : NOMBRE_SITIO;
         <span><strong>Artiani</strong><small>Distribucion</small></span>
       </a>
       <div class="auth-visual-copy">
-        <span class="badge badge-primary">Portal B2B privado</span>
-        <h1>Acceso comercial autorizado</h1>
-        <p>Catalogo, precios, disponibilidad y cotizaciones se habilitan desde el ERP segun tu perfil comercial.</p>
+        <span class="badge badge-primary">Artiani Distribucion</span>
+        <h1>Acceso comercial para negocios</h1>
+        <p>Solicita acceso o entra con tu cuenta autorizada para consultar productos para mascotas, acuario y comercios especializados.</p>
       </div>
     </section>
     <section class="auth-form-panel">
