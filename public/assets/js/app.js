@@ -376,11 +376,27 @@
     writeCart(cart);
   }
 
+  function setCatalogView(mode) {
+    var table = document.querySelector(".catalog-table-view");
+    var cards = document.querySelector(".catalog-card-view");
+    if (!table || !cards) { return; }
+    if (mode === "cards" && typeof window.renderCatalogCardsIfNeeded === "function") { window.renderCatalogCardsIfNeeded(); }
+    document.querySelectorAll("[data-view-mode]").forEach(function (button) {
+      button.classList.toggle("is-active", button.getAttribute("data-view-mode") === mode);
+    });
+    table.classList.toggle("is-hidden", mode !== "table");
+    cards.classList.toggle("is-hidden", mode !== "cards");
+  }
+
+  if (window.matchMedia && window.matchMedia("(max-width: 760px)").matches) {
+    setCatalogView("cards");
+  }
+
   document.addEventListener("click", function (event) {
     var sidebarButton = event.target.closest("[data-toggle-sidebar]");
     if (sidebarButton) { document.body.classList.toggle("sidebar-open"); return; }
     var mode = event.target.closest("[data-view-mode]");
-    if (mode) { document.querySelectorAll("[data-view-mode]").forEach(function (button) { button.classList.remove("is-active"); }); mode.classList.add("is-active"); document.querySelector(".catalog-table-view").classList.toggle("is-hidden", mode.getAttribute("data-view-mode") !== "table"); document.querySelector(".catalog-card-view").classList.toggle("is-hidden", mode.getAttribute("data-view-mode") !== "cards"); return; }
+    if (mode) { setCatalogView(mode.getAttribute("data-view-mode")); return; }
     var add = event.target.closest("[data-add-cotizacion]");
     if (add) { var extra = add.hasAttribute("data-from-mi-catalogo") ? readMiCatalogoInputs(add) : {cantidad: 1, comentario: ""}; addItem(add.getAttribute("data-id-sku"), add.getAttribute("data-nombre"), extra.cantidad, extra.comentario, !add.hasAttribute("data-from-mi-catalogo"), add); return; }
     if (event.target.closest("#cotizacion_revisar")) { revisarCotizacion(); return; }
@@ -426,6 +442,51 @@
     document.querySelectorAll("[data-product-panel]").forEach(function (panel) {
       panel.classList.toggle("is-hidden", panel.getAttribute("data-product-panel") !== target);
     });
+  });
+})();
+
+(function () {
+  function setText(selector, value) {
+    var node = document.querySelector(selector);
+    if (node) { node.textContent = value || ""; }
+  }
+
+  function closeProductModal() {
+    var modal = document.querySelector("[data-product-modal]");
+    if (modal) { modal.classList.add("is-hidden"); }
+  }
+
+  document.addEventListener("click", function (event) {
+    var open = event.target.closest("[data-open-product-modal]");
+    if (open) {
+      var modal = document.querySelector("[data-product-modal]");
+      if (!modal) { return; }
+      setText("[data-modal-sku]", open.getAttribute("data-sku") || "SKU");
+      setText("[data-modal-title]", open.getAttribute("data-nombre") || "Producto");
+      setText("[data-modal-category]", open.getAttribute("data-categoria") || "");
+      setText("[data-modal-brand]", open.getAttribute("data-marca") || "Sin marca");
+      setText("[data-modal-presentation]", open.getAttribute("data-presentacion") || "Unidad");
+      setText("[data-modal-price]", open.getAttribute("data-precio") || "Solicitar precio");
+      setText("[data-modal-availability]", open.getAttribute("data-disponibilidad") || "Consultar disponibilidad");
+      var media = document.querySelector("[data-modal-image]");
+      var image = open.getAttribute("data-imagen") || "";
+      if (media) { media.innerHTML = image ? "<img src=\"" + image.replace(/\"/g, "&quot;") + "\" alt=\"Producto\" loading=\"lazy\" decoding=\"async\">" : "<span class=\"icon icon-boxes\"></span>"; }
+      var link = document.querySelector("[data-modal-full-link]");
+      if (link) {
+        var slug = open.getAttribute("data-slug") || "";
+        link.href = slug ? ((document.body.getAttribute("data-url-raiz") || window.location.origin) + "/catalogo/producto/" + encodeURIComponent(slug)) : "#";
+        link.classList.toggle("is-hidden", slug === "");
+      }
+      modal.classList.remove("is-hidden");
+      return;
+    }
+    if (event.target.closest("[data-close-product-modal]") || event.target.matches("[data-product-modal]")) {
+      closeProductModal();
+    }
+  });
+
+  document.addEventListener("keydown", function (event) {
+    if (event.key === "Escape") { closeProductModal(); }
   });
 })();
 
@@ -512,7 +573,7 @@ var originalTableHtml = null;
   function renderTableRow(item, data) {
     var disponibilidad = item.disponibilidad && typeof item.disponibilidad === "object" ? item.disponibilidad : {};
     var estado = disponibilidad.estado || "consultar_disponibilidad";
-    var image = item.imagen_principal ? "<img src=\"" + escapeHtml(item.imagen_principal) + "\" alt=\"" + escapeHtml(item.nombre || "Producto") + "\">" : "<span class=\"thumb-placeholder icon icon-boxes\"></span>";
+    var image = item.imagen_principal ? "<img src=\"" + escapeHtml(item.imagen_principal) + "\" alt=\"" + escapeHtml(item.nombre || "Producto") + "\" loading=\"lazy\" decoding=\"async\">" : "<span class=\"thumb-placeholder icon icon-boxes\"></span>";
     return "<tr data-catalog-row data-id-sku=\"" + escapeHtml(item.id_sku || "") + "\">" +
       "<td><div class=\"product-cell\">" + image + "<div><strong>" + escapeHtml(item.nombre || "Producto") + "</strong><small>ID SKU " + escapeHtml(item.id_sku || "") + "</small></div></div></td>" +
       "<td class=\"catalog-category-cell\">" + escapeHtml(item.categoria || "Sin categoria visible") + "</td>" +
@@ -528,13 +589,23 @@ var originalTableHtml = null;
   function renderCard(item, data) {
     var disponibilidad = item.disponibilidad && typeof item.disponibilidad === "object" ? item.disponibilidad : {};
     var estado = disponibilidad.estado || "consultar_disponibilidad";
-    var image = item.imagen_principal ? "<img src=\"" + escapeHtml(item.imagen_principal) + "\" alt=\"" + escapeHtml(item.nombre || "Producto") + "\">" : "<span class=\"icon icon-boxes\"></span>";
+    var image = item.imagen_principal ? "<img src=\"" + escapeHtml(item.imagen_principal) + "\" alt=\"" + escapeHtml(item.nombre || "Producto") + "\" loading=\"lazy\" decoding=\"async\">" : "<span class=\"icon icon-boxes\"></span>";
     return "<article class=\"product-card product-card-final\" data-catalog-card data-id-sku=\"" + escapeHtml(item.id_sku || "") + "\"><div class=\"product-media\">" + image + "</div><div class=\"product-card-body\"><div class=\"product-tags\"><span class=\"badge badge-light\">" + escapeHtml(item.sku || "SKU") + "</span><span class=\"badge " + badgeClass(estado) + "\">" + escapeHtml(estado) + "</span></div><h3>" + escapeHtml(item.nombre || "Producto") + "</h3><p>" + escapeHtml(item.categoria || "Sin categoria visible") + "</p><div class=\"product-meta-row\"><span>" + escapeHtml(item.marca || "Sin marca") + "</span><span>" + escapeHtml(item.presentacion || "Unidad") + "</span></div><div class=\"price-line\">" + escapeHtml(priceText(item)) + "</div><div class=\"actions product-actions action-text-buttons\">" + actionButtons(item, data) + "</div></div></article>";
   }
 
+  function renderCatalogCardsIfNeeded() {
+    var cardList = document.querySelector("[data-catalog-card-list]");
+    if (!cardList || cardList.getAttribute("data-cards-rendered") === "1") { return; }
+    var data = readCatalogIndex();
+    cardList.innerHTML = data.items.length ? data.items.map(function (item) { return renderCard(item, data); }).join("") : "<div class=\"empty-row\">Sin productos visibles en esta página.</div>";
+    cardList.setAttribute("data-cards-rendered", "1");
+    originalCardsHtml = cardList.innerHTML;
+  }
+  window.renderCatalogCardsIfNeeded = renderCatalogCardsIfNeeded;
+
   function restoreOriginal(tableBody, cardList) {
     if (originalTableHtml !== null) { tableBody.innerHTML = originalTableHtml; }
-    if (cardList && originalCardsHtml !== null) { cardList.innerHTML = originalCardsHtml; }
+    if (cardList && originalCardsHtml !== null) { cardList.innerHTML = originalCardsHtml; cardList.setAttribute("data-cards-rendered", "1"); }
   }
 
   function applyLocalTableFilter(input) {
@@ -542,7 +613,7 @@ var originalTableHtml = null;
     if (!tableBody) { return; }
     var cardList = document.querySelector("[data-catalog-card-list]");
     if (originalTableHtml === null) { originalTableHtml = tableBody.innerHTML; }
-    if (cardList && originalCardsHtml === null) { originalCardsHtml = cardList.innerHTML; }
+    if (cardList && originalCardsHtml === null) { renderCatalogCardsIfNeeded(); originalCardsHtml = cardList.innerHTML; }
     var data = readCatalogIndex();
     var query = normalizeText(input.value);
     if (query === "") {
@@ -558,18 +629,22 @@ var originalTableHtml = null;
     var counter = document.querySelector("[data-local-filter-count]");
     if (counter) { counter.textContent = matches.length + " coincidencias"; }
     var status = document.querySelector("[data-catalog-filter-status]");
-    if (status) { status.textContent = data.items.length + " productos disponibles para búsqueda"; }
+    if (status) { status.textContent = data.items.length + " productos en esta pagina"; }
   }
 
   document.addEventListener("input", function (event) {
     if (!event.target.hasAttribute("data-table-local-search")) { return; }
     applyLocalTableFilter(event.target);
   });
+
+  if (window.matchMedia && window.matchMedia("(max-width: 760px)").matches) {
+    renderCatalogCardsIfNeeded();
+  }
 })();
 
 (function () {
   function pedidoStatusLabel(value) {
-    var map = {pedido_solicitado: "Pedido recibido", en_revision: "En revisión comercial", respondida: "Respuesta enviada", requiere_ajuste_cliente: "Requiere ajuste", cliente_acepto: "Aceptado por cliente", aceptado: "Aceptado por cliente", cliente_rechazo: "Rechazado por cliente", rechazado: "Rechazado por cliente", cancelado: "Cancelado", terminado: "Completado", completado: "Completado", sin_estatus: "En revisión"};
+    var map = {pedido_solicitado: "Pedido recibido", en_revision: "En revisión comercial", respondida: "Respuesta enviada", requiere_ajuste_cliente: "Ajuste solicitado", cliente_acepto: "Propuesta aceptada", aceptado: "Propuesta aceptada", cliente_rechazo: "Propuesta no aceptada", rechazado: "Propuesta no aceptada", cancelado: "Cancelado", terminado: "Completado", completado: "Completado", sin_estatus: "En revisión", pendiente_respuesta_cliente: "Pendiente de tu respuesta"};
     return map[value] || "En revisión";
   }
 
@@ -605,7 +680,7 @@ var originalTableHtml = null;
       setText("[data-mi-modal-presentation]", open.getAttribute("data-presentacion"));
       var media = document.querySelector("[data-mi-modal-image]");
       var image = open.getAttribute("data-imagen") || "";
-      if (media) { media.innerHTML = image ? "<img src=\"" + image.replace(/\"/g, "&quot;") + "\" alt=\"Producto\">" : "<span class=\"icon icon-boxes\"></span>"; }
+      if (media) { media.innerHTML = image ? "<img src=\"" + image.replace(/\"/g, "&quot;") + "\" alt=\"Producto\" loading=\"lazy\" decoding=\"async\">" : "<span class=\"icon icon-boxes\"></span>"; }
       modal.classList.remove("is-hidden");
       return;
     }
@@ -730,7 +805,7 @@ var originalTableHtml = null;
   }
 
   function pedidoStatusLabel(value) {
-    var map = {pedido_solicitado: "Pedido recibido", en_revision: "En revisión comercial", respondida: "Respuesta enviada", requiere_ajuste_cliente: "Requiere ajuste", cliente_acepto: "Aceptado por cliente", aceptado: "Aceptado por cliente", cliente_rechazo: "Rechazado por cliente", rechazado: "Rechazado por cliente", cancelado: "Cancelado", terminado: "Completado", completado: "Completado", sin_estatus: "En revisión"};
+    var map = {pedido_solicitado: "Pedido recibido", en_revision: "En revisión comercial", respondida: "Respuesta enviada", requiere_ajuste_cliente: "Ajuste solicitado", cliente_acepto: "Propuesta aceptada", aceptado: "Propuesta aceptada", cliente_rechazo: "Propuesta no aceptada", rechazado: "Propuesta no aceptada", cancelado: "Cancelado", terminado: "Completado", completado: "Completado", sin_estatus: "En revisión", pendiente_respuesta_cliente: "Pendiente de tu respuesta"};
     return map[value] || "En revisión";
   }
 
@@ -893,7 +968,7 @@ var originalTableHtml = null;
   }
 
   function pedidoStatusLabel(value) {
-    var map = {pedido_solicitado: "Pedido recibido", en_revision: "En revisión comercial", respondida: "Respuesta enviada", requiere_ajuste_cliente: "Requiere ajuste", cliente_acepto: "Aceptado por cliente", aceptado: "Aceptado por cliente", cliente_rechazo: "Rechazado por cliente", rechazado: "Rechazado por cliente", cancelado: "Cancelado", terminado: "Completado", completado: "Completado", sin_estatus: "En revisión"};
+    var map = {pedido_solicitado: "Pedido recibido", en_revision: "En revisión comercial", respondida: "Respuesta enviada", requiere_ajuste_cliente: "Ajuste solicitado", cliente_acepto: "Propuesta aceptada", aceptado: "Propuesta aceptada", cliente_rechazo: "Propuesta no aceptada", rechazado: "Propuesta no aceptada", cancelado: "Cancelado", terminado: "Completado", completado: "Completado", sin_estatus: "En revisión", pendiente_respuesta_cliente: "Pendiente de tu respuesta"};
     return map[value] || "En revisión";
   }
 
@@ -913,7 +988,7 @@ var originalTableHtml = null;
   }
 
   function cotizacionStatusLabel(value) {
-    var map = {borrador: "Borrador", recibida: "Recibida por Artiani", enviada_como_pedido: "Solicitud enviada", pedido_solicitado: "Pedido recibido", cancelada: "Cancelada", vencida: "Vencida", sin_estatus: "En revisión"};
+    var map = {borrador: "Borrador", recibida: "Recibida por Artiani", enviada_como_pedido: "Solicitud enviada", pedido_solicitado: "Pedido recibido", cancelada: "Cancelada", vencida: "Vencida", sin_estatus: "En revisión", pendiente_respuesta_cliente: "Pendiente de tu respuesta"};
     return map[value] || "En revisión";
   }
 
@@ -1028,5 +1103,85 @@ var originalTableHtml = null;
   document.addEventListener("keydown", function (event) {
     if (event.key === "Escape") { closeModal(); }
   });
+})();
+
+(function () {
+  var root = document.body.getAttribute("data-url-raiz") || window.location.origin;
+
+  function postJson(path, payload) {
+    return fetch(root + path, {method: "POST", headers: {"Content-Type": "application/json"}, credentials: "same-origin", body: JSON.stringify(payload || {})}).then(function (response) { return response.json(); });
+  }
+
+  function feedback(message, ok) {
+    var node = document.querySelector("[data-notificaciones-feedback]");
+    if (!node) { window.alert(message); return; }
+    node.textContent = message;
+    node.classList.remove("is-hidden", "alert-success", "alert-warning");
+    node.classList.add(ok ? "alert-success" : "alert-warning");
+  }
+
+  function notificationId(button) {
+    var item = button.closest("[data-notificacion-id]");
+    return item ? item.getAttribute("data-notificacion-id") : "";
+  }
+
+  function updateTopbarCount(total) {
+    document.querySelectorAll("[data-notification-count]").forEach(function (node) {
+      var count = Math.max(0, Number(total || 0) || 0);
+      node.textContent = String(count);
+      node.classList.toggle("has-items", count > 0);
+      node.classList.toggle("is-muted", count < 1);
+    });
+  }
+
+  function refreshSummary() {
+    if (!document.querySelector("[data-notification-count]")) { return; }
+    fetch(root + "/notificaciones/resumen", {credentials: "same-origin"}).then(function (response) {
+      return response.json();
+    }).then(function (response) {
+      if (response && !response.error) {
+        updateTopbarCount(response.no_leidas || response.pendientes || response.total_no_leidas || 0);
+      }
+    }).catch(function () {});
+  }
+
+  document.addEventListener("click", function (event) {
+    var readButton = event.target.closest("[data-notificacion-leida]");
+    if (readButton) {
+      var readId = notificationId(readButton);
+      if (!readId) { return; }
+      readButton.disabled = true;
+      postJson("/notificaciones/marcar_leida", {id_notificacion: readId}).then(function (response) {
+        if (response.error) { feedback(response.mensaje || "No se pudo marcar la notificacion.", false); readButton.disabled = false; return; }
+        var item = readButton.closest("[data-notificacion-id]");
+        if (item) { item.classList.remove("is-unread"); item.classList.add("is-read"); }
+        readButton.remove();
+        feedback(response.mensaje || "Notificacion marcada como leida.", true);
+        refreshSummary();
+      }).catch(function () {
+        readButton.disabled = false;
+        feedback("No se pudo marcar la notificacion.", false);
+      });
+      return;
+    }
+
+    var sendButton = event.target.closest("[data-notificacion-enviar]");
+    if (sendButton) {
+      var sendId = notificationId(sendButton);
+      var channel = sendButton.getAttribute("data-notificacion-enviar");
+      if (!sendId || !channel) { return; }
+      sendButton.disabled = true;
+      postJson("/notificaciones/enviar", {id_notificacion: sendId, canal: channel}).then(function (response) {
+        sendButton.disabled = false;
+        if (response.error) { feedback(response.mensaje || "No se pudo enviar la notificacion.", false); return; }
+        feedback(response.mensaje || "Notificacion enviada por " + channel + ".", true);
+      }).catch(function () {
+        sendButton.disabled = false;
+        feedback("No se pudo enviar la notificacion.", false);
+      });
+    }
+  });
+
+  refreshSummary();
 })();
 

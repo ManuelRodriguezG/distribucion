@@ -6,6 +6,10 @@ $perfilTipo = is_array($cliente) && !empty($cliente['tipo_cliente']) ? $cliente[
 $perfilEstatus = is_array($cliente) && !empty($cliente['estatus']) ? $cliente['estatus'] : 'sin sesion';
 $rutaActual = isset($_GET['url']) ? trim($_GET['url'], '/') : '';
 $rutaSegmento = $rutaActual !== '' ? explode('/', $rutaActual)[0] : '';
+$assetCss = '/public/assets/css/app.css';
+$assetJs = '/public/assets/js/app.js';
+$assetCssVersion = file_exists(RUTA_APP . '/../public/assets/css/app.css') ? filemtime(RUTA_APP . '/../public/assets/css/app.css') : time();
+$assetJsVersion = file_exists(RUTA_APP . '/../public/assets/js/app.js') ? filemtime(RUTA_APP . '/../public/assets/js/app.js') : time();
 $navItems = array(
   array('titulo' => 'Resumen', 'ruta' => '', 'icono' => 'speedometer', 'autenticado' => true),
   array('titulo' => 'Catálogo', 'ruta' => 'catalogo', 'icono' => 'boxes', 'accion' => 'ver_catalogo', 'permiso' => 'distribucion.catalogo.ver'),
@@ -13,6 +17,7 @@ $navItems = array(
   array('titulo' => 'Cotizaciones', 'ruta' => 'cotizaciones', 'icono' => 'quote', 'accion' => 'agregar_cotizacion', 'permiso' => 'distribucion.cotizacion.solicitar'),
   array('titulo' => 'Nueva solicitud', 'ruta' => 'cotizacion', 'icono' => 'plus', 'accion' => 'agregar_cotizacion', 'permiso' => 'distribucion.cotizacion.solicitar'),
   array('titulo' => 'Pedidos', 'ruta' => 'pedidos', 'icono' => 'quote', 'accion' => 'agregar_cotizacion', 'permiso' => 'distribucion.pedido.preliminar'),
+  array('titulo' => 'Notificaciones', 'ruta' => 'notificaciones', 'icono' => 'bell', 'autenticado' => true),
   array('titulo' => 'Cuenta', 'ruta' => 'cuenta', 'icono' => 'user', 'autenticado' => true)
 );
 ?>
@@ -22,7 +27,7 @@ $navItems = array(
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title><?php echo htmlspecialchars($titulo); ?> | <?php echo NOMBRE_SITIO; ?></title>
-  <link rel="stylesheet" href="<?php echo URL_RAIZ; ?>/public/assets/css/app.css">
+  <link rel="stylesheet" href="<?php echo URL_RAIZ . $assetCss; ?>?v=<?php echo htmlspecialchars((string) $assetCssVersion); ?>">
 </head>
 <body data-url-raiz="<?php echo htmlspecialchars(URL_RAIZ); ?>">
   <div class="app-shell">
@@ -67,6 +72,13 @@ $navItems = array(
           <h1><?php echo htmlspecialchars($titulo); ?></h1>
         </div>
         <div class="topbar-actions">
+          <?php if (SesionCliente::autenticado()): ?>
+            <a class="btn btn-light notification-topbar-link" href="<?php echo URL_RAIZ; ?>/notificaciones" title="Notificaciones">
+              <span class="icon icon-bell" aria-hidden="true"></span>
+              Avisos
+              <span class="counter is-muted" data-notification-count>0</span>
+            </a>
+          <?php endif; ?>
           <?php if (SesionCliente::tieneAccion('agregar_cotizacion', 'distribucion.cotizacion.solicitar')): ?>
             <a class="btn btn-light" href="<?php echo URL_RAIZ; ?>/cotizacion">
               <span class="icon icon-quote" aria-hidden="true"></span>
@@ -85,7 +97,7 @@ $navItems = array(
     </div>
   </div>
 
-  <script src="<?php echo URL_RAIZ; ?>/public/assets/js/app.js"></script>
+  <script src="<?php echo URL_RAIZ . $assetJs; ?>?v=<?php echo htmlspecialchars((string) $assetJsVersion); ?>"></script>
 </body>
 </html>
 

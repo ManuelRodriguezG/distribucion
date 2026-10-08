@@ -7,11 +7,8 @@ class Catalogo extends Controlador {
     $datos = array(
       'titulo' => 'Catalogo',
       'catalogo' => $api->catalogo($_GET),
-      'catalogo_indice' => $api->catalogoIndice($_GET),
       'mi_catalogo' => SesionCliente::tieneAccion('gestionar_mi_catalogo', 'distribucion.mi_catalogo.gestionar') ? $api->miCatalogoListar(array('limite' => 300)) : array('items' => array()),
       'categorias' => $api->categorias(),
-      'marcas' => $api->marcas(),
-      'filtros' => $api->filtros($_GET),
       'cliente' => SesionCliente::perfil()
     );
     $this->render('catalogo', $datos);

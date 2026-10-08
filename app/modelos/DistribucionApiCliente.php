@@ -151,6 +151,22 @@ class DistribucionApiCliente {
     return $this->normalizar($this->api->post('pedido/responder', $datos, SesionCliente::token()));
   }
 
+  public function notificacionResumen() {
+    return $this->normalizar($this->api->get('notificacion/resumen', array(), SesionCliente::token()));
+  }
+
+  public function notificacionListar($filtros = array()) {
+    return $this->normalizar($this->api->get('notificacion/listar', $this->limpiarFiltros($filtros), SesionCliente::token()));
+  }
+
+  public function notificacionMarcarLeida($datos) {
+    return $this->normalizar($this->api->post('notificacion/marcar_leida', $datos, SesionCliente::token()));
+  }
+
+  public function notificacionEnviar($datos) {
+    return $this->normalizar($this->api->post('notificacion/enviar', $datos, SesionCliente::token()));
+  }
+
   public function miCatalogoListar($filtros = array()) {
     return $this->normalizar($this->api->get('mi_catalogo/listar', $this->limpiarFiltros($filtros), SesionCliente::token()));
   }

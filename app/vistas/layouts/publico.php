@@ -1,6 +1,10 @@
 <?php
 $titulo = isset($datos['titulo']) ? $datos['titulo'] : NOMBRE_SITIO;
 $rutaActual = isset($_GET['url']) ? trim($_GET['url'], '/') : '';
+$assetCss = '/public/assets/css/app.css';
+$assetJs = '/public/assets/js/app.js';
+$assetCssVersion = file_exists(RUTA_APP . '/../public/assets/css/app.css') ? filemtime(RUTA_APP . '/../public/assets/css/app.css') : time();
+$assetJsVersion = file_exists(RUTA_APP . '/../public/assets/js/app.js') ? filemtime(RUTA_APP . '/../public/assets/js/app.js') : time();
 ?>
 <!doctype html>
 <html lang="es">
@@ -8,7 +12,7 @@ $rutaActual = isset($_GET['url']) ? trim($_GET['url'], '/') : '';
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title><?php echo htmlspecialchars($titulo); ?> | <?php echo NOMBRE_SITIO; ?></title>
-  <link rel="stylesheet" href="<?php echo URL_RAIZ; ?>/public/assets/css/app.css">
+  <link rel="stylesheet" href="<?php echo URL_RAIZ . $assetCss; ?>?v=<?php echo htmlspecialchars((string) $assetCssVersion); ?>">
 </head>
 <body class="public-page" data-url-raiz="<?php echo htmlspecialchars(URL_RAIZ); ?>">
   <header class="public-header">
@@ -37,6 +41,6 @@ $rutaActual = isset($_GET['url']) ? trim($_GET['url'], '/') : '';
       <a href="<?php echo URL_RAIZ; ?>/auth/registro">Solicitar acceso</a>
     </div>
   </footer>
-  <script src="<?php echo URL_RAIZ; ?>/public/assets/js/app.js"></script>
+  <script src="<?php echo URL_RAIZ . $assetJs; ?>?v=<?php echo htmlspecialchars((string) $assetJsVersion); ?>"></script>
 </body>
 </html>

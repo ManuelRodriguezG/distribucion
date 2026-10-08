@@ -149,3 +149,11 @@ Los datos vienen del ERP mediante:
 - El buscador dentro de la tabla ya no dispara consultas mientras se escribe ni se limita a la pagina visible; filtra en navegador sobre el indice completo cargado.
 - La paginacion sigue mostrando la vista operativa normal, pero al escribir en el filtro de tabla se repintan coincidencias de todos los productos cargados.
 
+## Ajuste 2026-10-07 - Rendimiento movil del catalogo
+
+- Se retira la precarga de indice completo en `/catalogo`; la pantalla inicial solo carga la pagina actual del catalogo paginado.
+- La carga inicial elimina llamadas no usadas a `marcas` y `filtros`; los ordenamientos quedan con fallback local y las categorias siguen viniendo del API.
+- El buscador local dentro de la tabla vuelve a filtrar solo los productos cargados en la pagina actual; la busqueda global sigue siendo el filtro superior `q` contra API.
+- La vista conserva paginacion real y evita hacer multiples llamadas de catalogo de 300 productos durante la primera carga movil.
+- Las imagenes de tabla, tarjetas y modales usan `loading="lazy"` y `decoding="async"` para reducir bloqueo visual en celular.
+

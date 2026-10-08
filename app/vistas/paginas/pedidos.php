@@ -22,11 +22,11 @@ if (!function_exists('dist_pedido_estado_label')) {
       'pedido_solicitado' => 'Pedido recibido',
       'en_revision' => 'En revisión comercial',
       'respondida' => 'Respuesta enviada',
-      'requiere_ajuste_cliente' => 'Requiere ajuste',
-      'cliente_acepto' => 'Aceptado por cliente',
-      'aceptado' => 'Aceptado por cliente',
-      'cliente_rechazo' => 'No aceptado por cliente',
-      'rechazado' => 'No aceptado por cliente',
+      'requiere_ajuste_cliente' => 'Ajuste solicitado',
+      'cliente_acepto' => 'Propuesta aceptada',
+      'aceptado' => 'Propuesta aceptada',
+      'cliente_rechazo' => 'Propuesta no aceptada',
+      'rechazado' => 'Propuesta no aceptada',
       'cancelado' => 'Cancelado',
       'terminado' => 'Completado',
       'completado' => 'Completado',
@@ -43,6 +43,21 @@ if (!function_exists('dist_pedido_entrega_label')) {
       'recoger_tienda' => 'Recoger en tienda'
     );
     return isset($mapa[$entrega]) ? $mapa[$entrega] : ucfirst(str_replace('_', ' ', (string) $entrega));
+  }
+}
+if (!function_exists('dist_pedido_respuesta_label')) {
+  function dist_pedido_respuesta_label($estatus) {
+    $mapa = array(
+      'aceptado' => 'Propuesta aceptada',
+      'cliente_acepto' => 'Propuesta aceptada',
+      'requiere_ajuste' => 'Ajuste solicitado',
+      'requiere_ajuste_cliente' => 'Ajuste solicitado',
+      'rechazado' => 'Propuesta no aceptada',
+      'cliente_rechazo' => 'Propuesta no aceptada',
+      'pendiente_respuesta_cliente' => 'Pendiente de tu respuesta',
+      'sin_estatus' => 'En revisión'
+    );
+    return isset($mapa[$estatus]) ? $mapa[$estatus] : dist_pedido_estado_label($estatus);
   }
 }
 ?>
@@ -64,7 +79,7 @@ if (!function_exists('dist_pedido_entrega_label')) {
             <?php $id = isset($pedido['id_cotizacion_distribucion']) ? $pedido['id_cotizacion_distribucion'] : ''; $moneda = isset($pedido['moneda']) ? $pedido['moneda'] : 'MXN'; ?>
             <tr>
               <td><strong><?php echo htmlspecialchars(isset($pedido['folio']) ? $pedido['folio'] : 'Sin folio'); ?></strong></td>
-              <td><span class="badge <?php echo dist_pedido_badge(isset($pedido['estatus']) ? $pedido['estatus'] : ''); ?>"><?php echo htmlspecialchars(dist_pedido_estado_label(isset($pedido['estatus']) ? $pedido['estatus'] : 'sin_estatus')); ?></span><?php if (!empty($pedido['respuesta_cliente_estatus'])): ?><small class="line-muted">Respuesta: <?php echo htmlspecialchars($pedido['respuesta_cliente_estatus']); ?></small><?php endif; ?></td>
+              <td><span class="badge <?php echo dist_pedido_badge(isset($pedido['estatus']) ? $pedido['estatus'] : ''); ?>"><?php echo htmlspecialchars(dist_pedido_estado_label(isset($pedido['estatus']) ? $pedido['estatus'] : 'sin_estatus')); ?></span><?php if (!empty($pedido['respuesta_cliente_estatus'])): ?><small class="line-muted">Respuesta: <?php echo htmlspecialchars(dist_pedido_respuesta_label($pedido['respuesta_cliente_estatus'])); ?></small><?php endif; ?></td>
               <td><?php echo htmlspecialchars(isset($pedido['partidas']) ? $pedido['partidas'] : 0); ?> productos distintos</td>
               <td><?php echo htmlspecialchars(isset($pedido['cantidad_solicitada']) ? (float) $pedido['cantidad_solicitada'] : 0); ?> piezas</td>
               <td class="fw-bold"><?php echo dist_pedido_money(isset($pedido['total_estimado']) ? $pedido['total_estimado'] : null, $moneda); ?></td>

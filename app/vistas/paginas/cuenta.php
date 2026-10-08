@@ -31,6 +31,41 @@ if (!function_exists('dist_cuenta_estado_solicitud_label')) {
     return isset($mapa[$estatus]) ? $mapa[$estatus] : 'En revisión';
   }
 }
+if (!function_exists('dist_cuenta_resumen_solicitud')) {
+  function dist_cuenta_resumen_solicitud($solicitud) {
+    $resumen = is_array($solicitud) && isset($solicitud['resumen']) ? (string) $solicitud['resumen'] : 'Cambio solicitado';
+    $texto = strtolower($resumen);
+    $camposComerciales = array('nombre_negocio', 'tipo_negocio', 'empresa');
+    $camposDomicilio = array('numero_exterior', 'numero_interior', 'calle', 'colonia', 'codigo_postal');
+    $camposFiscal = array('rfc', 'razon_social', 'regimen_fiscal', 'uso_cfdi', 'codigo_postal_fiscal', 'correo_facturacion');
+    $camposContacto = array('telefono', 'whatsapp', 'correo_alterno', 'contacto_principal');
+    $tieneComercial = false; $tieneDomicilio = false; $tieneFiscal = false; $tieneContacto = false;
+    foreach ($camposComerciales as $campo) { if (strpos($texto, $campo) !== false) { $tieneComercial = true; } }
+    foreach ($camposDomicilio as $campo) { if (strpos($texto, $campo) !== false) { $tieneDomicilio = true; } }
+    foreach ($camposFiscal as $campo) { if (strpos($texto, $campo) !== false) { $tieneFiscal = true; } }
+    foreach ($camposContacto as $campo) { if (strpos($texto, $campo) !== false) { $tieneContacto = true; } }
+    if ($tieneFiscal) { return 'Solicitud de actualización de datos fiscales.'; }
+    if ($tieneComercial && $tieneDomicilio) { return 'Solicitud de actualización de datos comerciales y domicilio.'; }
+    if ($tieneComercial) { return 'Solicitud de actualización de datos comerciales.'; }
+    if ($tieneDomicilio) { return 'Solicitud de actualización de domicilio de entrega.'; }
+    if ($tieneContacto) { return 'Solicitud de actualización de datos de contacto.'; }
+    $reemplazos = array(
+      'nombre_negocio' => 'nombre comercial',
+      'tipo_negocio' => 'tipo de negocio',
+      'numero_exterior' => 'número exterior',
+      'numero_interior' => 'número interior',
+      'codigo_postal_fiscal' => 'código postal fiscal',
+      'codigo_postal' => 'código postal',
+      'razon_social' => 'razón social',
+      'regimen_fiscal' => 'régimen fiscal',
+      'uso_cfdi' => 'uso CFDI',
+      'correo_facturacion' => 'correo de facturación',
+      'correo_alterno' => 'correo alterno',
+      'contacto_principal' => 'contacto principal'
+    );
+    return strtr($resumen, $reemplazos);
+  }
+}
 if (!function_exists('dist_cuenta_valor')) {
   function dist_cuenta_valor($datos, $clave, $default = '') {
     if (!is_array($datos) || !array_key_exists($clave, $datos) || $datos[$clave] === null) { return $default; }
@@ -134,7 +169,7 @@ if (!function_exists('dist_cuenta_checked')) {
     <div class="card-header"><div><h2>Solicitudes de cambio</h2><p>Historial de cambios pendientes, aplicados o rechazados.</p></div></div>
     <ul class="status-list">
       <?php if (empty($solicitudesCambio)): ?><li><span class="badge badge-info">Sin pendientes</span><span>No hay cambios de perfil pendientes.</span></li><?php endif; ?>
-      <?php foreach ($solicitudesCambio as $solicitud): ?><li><span class="badge badge-warning"><?php echo htmlspecialchars(dist_cuenta_estado_solicitud_label(isset($solicitud['estatus']) ? $solicitud['estatus'] : 'en_revision')); ?></span><span><?php echo htmlspecialchars(isset($solicitud['resumen']) ? $solicitud['resumen'] : 'Cambio solicitado'); ?><?php if (!empty($solicitud['fecha_registro'])): ?> · <?php echo htmlspecialchars($solicitud['fecha_registro']); ?><?php endif; ?></span></li><?php endforeach; ?>
+      <?php foreach ($solicitudesCambio as $solicitud): ?><li><span class="badge badge-warning"><?php echo htmlspecialchars(dist_cuenta_estado_solicitud_label(isset($solicitud['estatus']) ? $solicitud['estatus'] : 'en_revision')); ?></span><span><?php echo htmlspecialchars(dist_cuenta_resumen_solicitud($solicitud)); ?><?php if (!empty($solicitud['fecha_registro'])): ?> · <?php echo htmlspecialchars($solicitud['fecha_registro']); ?><?php endif; ?></span></li><?php endforeach; ?>
     </ul>
   </article>
 

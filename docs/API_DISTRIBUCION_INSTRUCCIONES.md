@@ -475,6 +475,105 @@ Respuesta:
 }
 ```
 
+## Endpoints de notificaciones
+
+Las notificaciones viven en el ERP. Distribucion solo las consulta, marca lectura y solicita envio por canal autorizado.
+
+Casos esperados:
+
+- Pedido recibido o puesto en revision.
+- Pedido revisado y listo para respuesta del cliente.
+- Ajuste solicitado por administracion.
+- Solicitud resuelta, completada, rechazada o cancelada.
+- Cuenta aprobada, rechazada, suspendida o con cambios de permisos.
+- Mensaje comercial manual para el prospecto o cliente.
+
+### GET /DistribucionApi/notificacion/resumen
+
+Devuelve conteos para la barra superior.
+
+```json
+{
+  "error": false,
+  "no_leidas": 2,
+  "pendientes": 1,
+  "total": 8
+}
+```
+
+### GET /DistribucionApi/notificacion/listar
+
+Lista notificaciones visibles para el cliente autenticado.
+
+Parametros sugeridos:
+
+```text
+estatus
+tipo
+pagina
+limite
+```
+
+Respuesta:
+
+```json
+{
+  "error": false,
+  "items": [
+    {
+      "id_notificacion": 10,
+      "tipo": "pedido_requiere_respuesta",
+      "titulo": "Tu pedido ya fue revisado",
+      "mensaje": "Revisa la propuesta comercial y confirma si deseas continuar.",
+      "folio_referencia": "PED-DIST-20261007-0001",
+      "url_accion": "/pedidos",
+      "leida": false,
+      "canales_disponibles": ["correo", "whatsapp"],
+      "fecha_registro": "2026-10-07 12:00:00"
+    }
+  ],
+  "paginacion": {
+    "pagina": 1,
+    "limite": 20,
+    "total": 1
+  }
+}
+```
+
+### POST /DistribucionApi/notificacion/marcar_leida
+
+Marca una notificacion propia como leida.
+
+```json
+{
+  "id_notificacion": 10
+}
+```
+
+### POST /DistribucionApi/notificacion/enviar
+
+Solicita al ERP enviar o reenviar una notificacion por un canal permitido. El ERP debe validar que la notificacion pertenezca al cliente/prospecto, que el canal este permitido y que exista informacion de contacto suficiente.
+
+Payload:
+
+```json
+{
+  "id_notificacion": 10,
+  "canal": "whatsapp"
+}
+```
+
+Respuesta:
+
+```json
+{
+  "error": false,
+  "mensaje": "Notificacion enviada por WhatsApp",
+  "canal": "whatsapp",
+  "estatus_envio": "enviado"
+}
+```
+
 ## Endpoints internos ERP para administracion
 
 Crear un controlador interno, por ejemplo `DistribucionAdmin`, protegido por sesion ERP y permisos internos.

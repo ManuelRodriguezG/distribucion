@@ -66,3 +66,11 @@ Permitir que el cliente arme una solicitud comercial sin crear venta ni afectar 
 - Los borradores dejan de ser locales como fuente principal y se guardan en ERP; `localStorage` solo conserva el carrito temporal y el borrador que el cliente esta editando.
 - Enviar una cotizacion crea un pedido separado; si el cliente olvida productos debe crear otra cotizacion/pedido, no modificar el pedido anterior.
 - `/pedidos` sigue mostrando solo pedidos formales y no mezcla borradores.
+
+## Decision 2026-10-07 - Notificaciones comerciales
+
+- Distribucion agrega `/notificaciones` como centro de avisos para clientes/prospectos autenticados.
+- El ERP sigue siendo fuente de verdad de notificaciones, contactos, plantillas, reglas de envio y auditoria.
+- El frontend consume `notificacion/resumen`, `notificacion/listar`, `notificacion/marcar_leida` y `notificacion/enviar`.
+- Las notificaciones deben generarse cuando el ERP revise un pedido, solicite respuesta, resuelva una solicitud, actualice una cuenta o necesite comunicar un cambio comercial.
+- `notificacion/enviar` solo solicita al ERP reenviar una notificacion por canal (`correo`, `whatsapp`, `sms` o `llamada`); el ERP decide si el canal esta disponible para ese prospecto y no debe exponer datos sensibles.
