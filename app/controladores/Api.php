@@ -18,7 +18,7 @@ class Api extends Controlador {
     $this->render('api/distribucion/tester', array(
       'titulo' => 'Tester API Distribucion',
       'api_base_url' => ERP_API_BASE_URL,
-      'erp_url' => 'http://panel.com.local'
+      'erp_url' => ERP_URL_RAIZ
     ));
   }
 

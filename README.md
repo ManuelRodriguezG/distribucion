@@ -11,16 +11,18 @@ Base MVC inicial creada para XAMPP/cPanel.
 ## Rutas iniciales
 
 - `http://distribucion.artiani.com.local/` inicio
-- `http://distribucion.artiani.com.local/Auth/login`
-- `http://distribucion.artiani.com.local/Auth/registro`
-- `http://distribucion.artiani.com.local/Catalogo`
-- `http://distribucion.artiani.com.local/Cotizacion`
-- `http://distribucion.artiani.com.local/Cuenta`
+- `http://distribucion.artiani.com.local/auth/login`
+- `http://distribucion.artiani.com.local/auth/registro`
+- `http://distribucion.artiani.com.local/catalogo`
+- `http://distribucion.artiani.com.local/cotizacion`
+- `http://distribucion.artiani.com.local/cuenta`
 
 ## Dominios
 
 - Local: `distribucion.artiani.com.local`
 - Produccion futura: `distribucion.artiani.com.mx`
+- ERP local: `http://panel.com.local`
+- ERP produccion: `https://sys.artiani.com.mx`
 
 ## Contrato API
 

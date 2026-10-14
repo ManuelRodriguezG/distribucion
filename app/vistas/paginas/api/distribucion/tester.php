@@ -1,6 +1,6 @@
 <?php
 $apiBaseUrl = isset($datos['api_base_url']) ? $datos['api_base_url'] : ERP_API_BASE_URL;
-$erpUrl = isset($datos['erp_url']) ? $datos['erp_url'] : 'http://panel.com.local';
+$erpUrl = isset($datos['erp_url']) ? $datos['erp_url'] : ERP_URL_RAIZ;
 ?>
 <section class="tester-shell" data-api-base="<?php echo htmlspecialchars($apiBaseUrl); ?>" data-erp-url="<?php echo htmlspecialchars($erpUrl); ?>">
   <div class="tester-hero">

@@ -6,7 +6,8 @@
 - Host local canonico: `http://distribucion.artiani.com.local`.
 - Dominio productivo previsto: `https://distribucion.artiani.com.mx`.
 - ERP fuente de verdad: `C:\xampp\htdocs\panel_de_control`.
-- API ERP prevista: `http://localhost/panel_de_control/DistribucionApi`.
+- API ERP local: `http://panel.com.local/DistribucionApi`.
+- API ERP productiva: `https://sys.artiani.com.mx/DistribucionApi`.
 - No crear logica principal de catalogo, precios, inventario, listas o clientes autorizados dentro de Distribucion si pertenece al ERP.
 
 Este proyecto es una plataforma externa para clientes, revendedores, mayoristas y distribuidores autorizados. Debe sentirse parte del ecosistema Artiani/ERP, pero estar separado del panel interno.
