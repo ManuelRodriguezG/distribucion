@@ -80,12 +80,7 @@ class Controlador {
     }
     $api = $this->modelo('DistribucionApiCliente');
     $respuesta = $api->perfil();
-    if (!empty($respuesta['perfil']) && is_array($respuesta['perfil'])) {
-      SesionCliente::actualizarPerfil($respuesta['perfil']);
-      return;
-    }
-
-    $perfil = array();
+    $perfil = !empty($respuesta['perfil']) && is_array($respuesta['perfil']) ? $respuesta['perfil'] : array();
     if (!empty($respuesta['permisos']) && is_array($respuesta['permisos'])) {
       $perfil['permisos'] = $respuesta['permisos'];
     }

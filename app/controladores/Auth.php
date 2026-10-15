@@ -13,7 +13,14 @@ class Auth extends Controlador {
       $api = $this->modelo('DistribucionApiCliente');
       $respuesta = $this->normalizarRespuestaLogin($api->login($_POST));
       if (empty($respuesta['error']) && !empty($respuesta['token'])) {
-        SesionCliente::iniciar(isset($respuesta['perfil']) ? $respuesta['perfil'] : array(), $respuesta['token']);
+        $perfil = isset($respuesta['perfil']) && is_array($respuesta['perfil']) ? $respuesta['perfil'] : array();
+        if (isset($respuesta['permisos']) && is_array($respuesta['permisos'])) {
+          $perfil['permisos'] = $respuesta['permisos'];
+        }
+        if (isset($respuesta['acciones']) && is_array($respuesta['acciones'])) {
+          $perfil['acciones'] = $respuesta['acciones'];
+        }
+        SesionCliente::iniciar($perfil, $respuesta['token']);
         $this->refrescarSesionCliente();
         header('Location: ' . $this->destinoPosteriorLogin());
         exit;

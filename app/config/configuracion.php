@@ -4,6 +4,8 @@ define('RUTA_APP', dirname(__DIR__));
 define('RUTA_PROYECTO', dirname(__DIR__, 2));
 define('NOMBRE_SITIO', 'Distribucion');
 
+date_default_timezone_set('America/Mexico_City');
+
 define('DISTRIBUCION_DOMINIO_LOCAL', 'distribucion.artiani.com.local');
 define('DISTRIBUCION_DOMINIO_PRODUCCION', 'distribucion.artiani.com.mx');
 define('ERP_DOMINIO_LOCAL', 'panel.com.local');
