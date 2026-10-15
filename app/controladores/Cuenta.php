@@ -35,6 +35,57 @@ class Cuenta extends Controlador {
     $this->render('cuenta', $datos);
   }
 
+  /**
+   * IA: Codex GPT-5 | Fecha: 2026-10-14
+   * Proposito: exponer diagnostico protegido para comparar sesion frontend contra respuestas reales de la API ERP.
+   * Impacto: Distribucion; ayuda a detectar si faltan permisos, lista, asociacion de cliente o datos productivos.
+   * Contrato: GET autenticado, JSON; no muestra token ni escribe datos.
+   */
+  public function diagnostico() {
+    $this->requerirCliente();
+    $this->refrescarSesionCliente();
+
+    $api = $this->modelo('DistribucionApiCliente');
+    $perfilSesion = SesionCliente::perfil();
+    $perfilApi = $api->perfil();
+    $catalogo = $api->catalogo(array('limite' => 5));
+    $miCatalogo = $api->miCatalogoListar(array('limite' => 5));
+    $cotizaciones = $api->cotizacionListar(array('limite' => 5));
+    $pedidos = $api->pedidoListar(array('limite' => 5));
+    $notificaciones = $api->notificacionListar(array('limite' => 5));
+
+    return $this->json(array(
+      'error' => false,
+      'mensaje' => 'Diagnostico de cuenta Distribucion',
+      'ambiente' => array(
+        'url_raiz' => URL_RAIZ,
+        'erp_url_raiz' => defined('ERP_URL_RAIZ') ? ERP_URL_RAIZ : null,
+        'erp_api_base_url' => ERP_API_BASE_URL,
+        'host' => isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : null
+      ),
+      'sesion_frontend' => array(
+        'autenticado' => SesionCliente::autenticado(),
+        'perfil' => $this->sanitizarPerfilDiagnostico($perfilSesion),
+        'permisos' => SesionCliente::permisos(),
+        'acciones' => SesionCliente::acciones()
+      ),
+      'perfil_api' => $this->sanitizarRespuestaDiagnostico($perfilApi),
+      'checks' => array(
+        'puede_ver_catalogo' => SesionCliente::tieneAccion('ver_catalogo', 'distribucion.catalogo.ver'),
+        'puede_cotizar' => SesionCliente::tieneAccion('agregar_cotizacion', 'distribucion.cotizacion.solicitar'),
+        'puede_mi_catalogo' => SesionCliente::tieneAccion('gestionar_mi_catalogo', 'distribucion.mi_catalogo.gestionar'),
+        'tiene_lista_precio' => SesionCliente::tieneListaPrecio()
+      ),
+      'resumen_endpoints' => array(
+        'catalogo' => $this->resumenRespuestaLista($catalogo),
+        'mi_catalogo' => $this->resumenRespuestaLista($miCatalogo),
+        'cotizaciones' => $this->resumenRespuestaLista($cotizaciones),
+        'pedidos' => $this->resumenRespuestaLista($pedidos),
+        'notificaciones' => $this->resumenRespuestaLista($notificaciones)
+      )
+    ));
+  }
+
   private function normalizarCambioPerfil($datos) {
     $datos = is_array($datos) ? $datos : array();
     $payload = array(
@@ -74,5 +125,47 @@ class Cuenta extends Controlador {
 
   private function texto($datos, $clave) {
     return isset($datos[$clave]) ? trim((string) $datos[$clave]) : '';
+  }
+
+  private function resumenRespuestaLista($respuesta) {
+    $respuesta = is_array($respuesta) ? $respuesta : array('error' => true, 'mensaje' => 'Respuesta invalida');
+    $items = array();
+    if (isset($respuesta['items']) && is_array($respuesta['items'])) {
+      $items = $respuesta['items'];
+    } elseif (isset($respuesta['registros']) && is_array($respuesta['registros'])) {
+      $items = $respuesta['registros'];
+    } elseif (isset($respuesta['cotizaciones']) && is_array($respuesta['cotizaciones'])) {
+      $items = $respuesta['cotizaciones'];
+    } elseif (isset($respuesta['pedidos']) && is_array($respuesta['pedidos'])) {
+      $items = $respuesta['pedidos'];
+    } elseif (isset($respuesta['notificaciones']) && is_array($respuesta['notificaciones'])) {
+      $items = $respuesta['notificaciones'];
+    }
+
+    return array(
+      'error' => !empty($respuesta['error']),
+      'mensaje' => isset($respuesta['mensaje']) ? $respuesta['mensaje'] : '',
+      'codigo' => isset($respuesta['codigo']) ? $respuesta['codigo'] : null,
+      'total_items_detectados' => count($items),
+      'total_reportado' => isset($respuesta['total']) ? $respuesta['total'] : (isset($respuesta['paginacion']['total']) ? $respuesta['paginacion']['total'] : null),
+      'primer_item_claves' => !empty($items[0]) && is_array($items[0]) ? array_keys($items[0]) : array(),
+      'requiere_permiso' => isset($respuesta['requiere_permiso']) ? $respuesta['requiere_permiso'] : null,
+      'requiere_autenticacion' => isset($respuesta['requiere_autenticacion']) ? $respuesta['requiere_autenticacion'] : null
+    );
+  }
+
+  private function sanitizarRespuestaDiagnostico($respuesta) {
+    $respuesta = is_array($respuesta) ? $respuesta : array('error' => true);
+    unset($respuesta['token'], $respuesta['access_token'], $respuesta['refresh_token']);
+    if (isset($respuesta['depurar']['token'])) { unset($respuesta['depurar']['token']); }
+    if (isset($respuesta['depurar']['access_token'])) { unset($respuesta['depurar']['access_token']); }
+    if (isset($respuesta['depurar']['refresh_token'])) { unset($respuesta['depurar']['refresh_token']); }
+    return $respuesta;
+  }
+
+  private function sanitizarPerfilDiagnostico($perfil) {
+    $perfil = is_array($perfil) ? $perfil : array();
+    unset($perfil['token'], $perfil['access_token'], $perfil['refresh_token']);
+    return $perfil;
   }
 }
